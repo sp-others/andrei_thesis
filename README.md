@@ -4,10 +4,12 @@
 https://pysindy.readthedocs.io/en/latest/examples/2_introduction_to_sindy/example.html
 https://pygpgo.readthedocs.io/en/latest/
 
+https://github.com/josejimenezluna/pyGPGO/tree/master/pyGPGO
+
 ## python environment (linux)
 ```
 python -m venv venv
-source venv/bin/activate
+source venv/bin/activate # Windows: .\venv\Scripts\activate
 
 pip install ipykernel
 python -m ipykernel install --user --name=andrei_licenta
