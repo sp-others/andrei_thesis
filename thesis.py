@@ -126,9 +126,8 @@ plot_subplot(t_list, param1_list, "param1")
 plot_subplot(t_list, param2_list, "param2")
 plot_subplot(t_list, current_eval_list, "current_eval")
 
-# TODO: is this really the best? and what does best mean here? NOTE that: (1) logger is using self.tau for "best eval." and (2) gpgo.tau is calculated using max
-best_params = params_list[-1]
-best_eval = current_eval_list[-1]
+best_eval = min(current_eval_list)
+best_params = params_list[np.where(current_eval_list == best_eval)][0]
 print(f'\nbest_params, best_eval={best_params, best_eval}')
 
 model, x_data = get_model_and_data(best_params[0], best_params[1])
