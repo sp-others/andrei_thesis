@@ -12,6 +12,7 @@ from pyGPGO.GPGO import GPGO
 from sklearn.metrics import mean_squared_error
 
 
+np.random.seed(42)
 def generate_data():
     data_sine = np.linspace(-np.pi / 2, np.pi / 2, num=1000)
     return np.array(data_sine)
@@ -39,11 +40,13 @@ def get_model(param1, param2):
 
 
 def get_score(model: SINDy):
-    return model.score(x_data, metric=mean_squared_error) + alpha * model.complexity
+    # return model.score(x_data, metric=mean_squared_error) + alpha * model.complexity
+    return model.score(x_data, metric=mean_squared_error)
 
 
-for param1 in range(2, 101, 10):
-    for param2 in range(2, 101, 10):
+range_ = range(2, 101, 20)
+for param1 in range_:
+    for param2 in range_:
         model = get_model(param1, param2)
         score = get_score(model)
         print(f'param1: {param1}, param2: {param2} score: {score}')
