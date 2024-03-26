@@ -5,7 +5,9 @@ from sklearn.metrics import mean_squared_error
 np.random.seed(42)
 count = 100
 t = np.linspace(0, 10, count)
-x = np.linspace(-np.pi / 2, np.pi / 2, num=count)
+x = np.linspace(-np.pi / 2, np.pi / 2, num=count) # problem HERE
+x = np.sin(t) # still gives warning
+x = np.sin(t) + np.random.normal(scale=0.1, size=count)  # Adding noise to sin function
 data = x.reshape(-1, 1)
 
 scores = set()

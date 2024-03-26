@@ -34,6 +34,6 @@ for param1 in param_range:
 
         score = model.score(data, metric=mean_squared_error)
         scores.add(score)
-        print(f"param1={param1}, param2={param2} score: {score}")
+        print(f'param1: {param1}, param2: {param2} score: {score}')
 
 print(f'len(scores): {len(scores)}')
