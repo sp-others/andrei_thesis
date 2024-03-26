@@ -11,20 +11,25 @@ from pyGPGO.acquisition import Acquisition
 from pyGPGO.GPGO import GPGO
 from sklearn.metrics import mean_squared_error
 
-#importarea modulelor necesare prelucrarii datelor, optimizarii bayesiene si gasirii ecuatiilor sistemului dinamic
+# importarea modulelor necesare prelucrarii datelor, optimizarii bayesiene si gasirii ecuatiilor sistemului dinamic
 
 
+def generate_data():
+    data_sine = np.linspace(-np.pi / 2, np.pi / 2, num=1000)
+    return np.array(data_sine)
 
-data_sine = np.linspace(-np.pi/2, np.pi/2, num=1000)
 
+x_data = generate_data()
+differentiation_method = ps.FiniteDifference(order=2)
+alpha = 1
 
 
 def err(param1, param2):
-    _model, x_data = get_model_and_data(param1, param2)
-    alpha = 1
+    _model = get_model(param1, param2)
     score = _model.score(x_data, metric=mean_squared_error) + alpha * _model.complexity
-    print(f'parametrii folositi in functie sunt acestea {param1,param2} \n')
+    print(f'parametrii folositi in functie sunt acestea {param1, param2} \n')
     return score
+
 
 # variabila score modeleaza performantele aproximarii, unde _model.complexity este un numar ce reprezinta numarul
 # de parametri non-zero
@@ -32,11 +37,8 @@ def err(param1, param2):
 
 TIME = np.linspace(0, 1, 1000)
 
-def get_model_and_data(param1, param2):
 
-    x = np.array(data_sine)
-    x_data = x
-    differentiation_method = ps.FiniteDifference(order=2)
+def get_model(param1, param2):
     poly_lib = ps.PolynomialLibrary(degree=int(param1))
     trig_lib = ps.FourierLibrary(n_frequencies=int(param2))
     custom_lib = poly_lib + trig_lib
@@ -48,30 +50,28 @@ def get_model_and_data(param1, param2):
         optimizer=optimizer,
         feature_names=["x"])
     model.fit(x_data, t=TIME)
-    print(f'parametrii folositi in model sunt acestea{param1,param2}\n')
-    return model, x_data
-
-
+    print(f'parametrii folositi in model sunt acestea{param1, param2}\n')
+    return model
 
 
 cov = squaredExponential()
 surogate = GaussianProcess(cov)
-acq = Acquisition(mode = 'ExpectedImprovement')
-params = {'param1' : ('int',[2,100]),
-          'param2' : ('int',[2,100])}
+acq = Acquisition(mode='ExpectedImprovement')
+params = {'param1': ('int', [2, 100]),
+          'param2': ('int', [2, 100])}
 np.random.seed(23)
-gpgo = GPGO(surogate, acq, err,params)
-gpgo.run(max_iter = 20,init_evals=5)
+gpgo = GPGO(surogate, acq, err, params)
+gpgo.run(max_iter=20, init_evals=5)
 print(gpgo.GP.y)
 
 exit(0)
-
 
 from pysindy.utils import concat_sample_axis, drop_nan_samples
 from pysindy.pysindy import _adapt_to_multiple_trajectories, _comprehend_and_validate_inputs
 
 
-def get_x_dot_and_x_dot_predicted(_model, x, t=None, x_dot=None, u=None, multiple_trajectories=False, metric=err, **metric_kws):
+def get_x_dot_and_x_dot_predicted(_model, x, t=None, x_dot=None, u=None, multiple_trajectories=False, metric=err,
+                                  **metric_kws):
     """this is copy-pasted from pysindy.pysindy.PySINDy.score"""
     if t is None:
         t = _model.t_default
@@ -104,7 +104,6 @@ t_list = list(range(1, len(params_list) + 1))
 param1_list = [point[0] for point in params_list]
 param2_list = [point[1] for point in params_list]
 
-
 print(f't_list={t_list}')
 print('\n')
 print(f'point_param1_list={param1_list}')
@@ -117,8 +116,9 @@ print('\n')
 
 def plot_subplot(x, y, label):
     subplot = plst.figure().add_subplot()
-    subplot.plot(x, y, label = label)
+    subplot.plot(x, y, label=label)
     subplot.legend()
+
 
 plot_subplot(t_list, param1_list, "param1")
 plot_subplot(t_list, param2_list, "param2")
@@ -129,23 +129,18 @@ best_params = params_list[np.where(current_eval_list == best_eval)][0]
 print(f'\nbest_params, best_eval={best_params, best_eval}')
 
 model, x_data = get_model_and_data(best_params[0], best_params[1])
-model.print() # prints (x)'
+model.print()  # prints (x)'
 
 x_derivative_real = model.differentiate(x_data)
-_, x_derivative_estimated = get_x_dot_and_x_dot_predicted(model, x_data) # NOTE that _ = x_derivative_real
+_, x_derivative_estimated = get_x_dot_and_x_dot_predicted(model, x_data)  # NOTE that _ = x_derivative_real
 
 derivative_subplot = plst.figure().add_subplot()
-derivative_subplot.plot(TIME, x_derivative_real, label ="x_derivative_real")
-derivative_subplot.plot(TIME, x_derivative_estimated, label ="x_derivative_estimated")
+derivative_subplot.plot(TIME, x_derivative_real, label="x_derivative_real")
+derivative_subplot.plot(TIME, x_derivative_estimated, label="x_derivative_estimated")
 derivative_subplot.legend()
 
 plst.show()
 
-
-
-
-
-
-#sa verific ca param1 si param 2 se fedeaza la fiecare iteratie a optimizarii bayesiene
+# sa verific ca param1 si param 2 se fedeaza la fiecare iteratie a optimizarii bayesiene
 # optimizarea lui sindy si BO.
 # set de date/aplicatie public data sets for ML/kagel

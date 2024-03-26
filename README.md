@@ -1,5 +1,8 @@
 # Licenta
 
+##  curent problem
+make model.score() return different results for different (param1, param2) values
+
 https://github.com/AndreiRaceanu/Bachelor-Thesis
 
 
