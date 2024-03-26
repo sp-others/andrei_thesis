@@ -16,8 +16,7 @@ from sklearn.metrics import mean_squared_error
 
 count = 1000
 def generate_data():
-    return np.sin(np.linspace(-np.pi/2, np.pi/2, count))
-    return np.sin(np.linspace(0, 10, count)) + np.random.normal(scale=0.1, size=count)
+    return np.sin(np.linspace(-np.pi/2, np.pi/2, count)) + np.random.uniform(low=0, high=1, size=count)
 
 
 x_data = generate_data()
