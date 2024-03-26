@@ -10,7 +10,7 @@ show the model score for each, with the metric=mean_squared_error
 
 import numpy as np
 from sklearn.metrics import mean_squared_error
-from pysindy import SINDy
+from pysindy import SINDy, FiniteDifference
 from pysindy.feature_library import PolynomialLibrary, FourierLibrary
 
 # Generate synthetic 1D data
@@ -31,7 +31,7 @@ for param1 in param_range:
         feature_library = PolynomialLibrary(degree=param1) + FourierLibrary(n_frequencies=param2)
 
         # Initialize SINDy estimator
-        model = SINDy(feature_names=["x"], feature_library=feature_library)
+        model = SINDy(differentiation_method=FiniteDifference(order=2), feature_names=["x"], feature_library=feature_library)
 
         # Fit the model to the data
         model.fit(data, t=t)
