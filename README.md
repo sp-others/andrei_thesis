@@ -4,6 +4,9 @@
 make model.score() return different results for different (param1, param2) values
 at this point `chat_gpt_example.py` and `test_model.py` differ only in data
 
+file        | test_model.py | chat_gpt_example
+data shape  | (1000,) | (100, 1)
+
 
 https://github.com/AndreiRaceanu/Bachelor-Thesis
 
