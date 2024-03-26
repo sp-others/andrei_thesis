@@ -13,15 +13,14 @@ from sklearn.metrics import mean_squared_error
 from pysindy import SINDy
 from pysindy.feature_library import PolynomialLibrary, FourierLibrary
 
-# Generate synthetic data for demonstration
+# Generate synthetic 1D data
 np.random.seed(42)
 t = np.linspace(0, 10, 100)
-x = np.sin(t)
-y = np.cos(t)
-data = np.array([x, y]).T
+x = np.sin(t) + np.random.normal(scale=0.1, size=100)  # Adding noise to sin function
+data = x.reshape(-1, 1)  # Reshape to make it 2D for PySINDy
 
 # Define parameter ranges
-param_range = range(2, 101, 20)  # param1 and param2 values from 2 to 100 with step 10
+param_range = range(2, 101, 10)  # param1 and param2 values from 2 to 100 with step 10
 
 # Iterate over parameter combinations
 for param1 in param_range:
@@ -32,7 +31,7 @@ for param1 in param_range:
         feature_library = PolynomialLibrary(degree=param1) + FourierLibrary(n_frequencies=param2)
 
         # Initialize SINDy estimator
-        model = SINDy(feature_names=["x", "y"], feature_library=feature_library)
+        model = SINDy(feature_names=["x"], feature_library=feature_library)
 
         # Fit the model to the data
         model.fit(data, t=t)
