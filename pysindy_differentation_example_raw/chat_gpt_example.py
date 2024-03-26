@@ -7,9 +7,10 @@ show the model score for each, with the metric=mean_squared_error
 """
 
 import numpy as np
-from sklearn.metrics import mean_squared_error
-from pysindy import SINDy, FiniteDifference, STLSQ
+import pysindy as ps
+from pysindy import SINDy, FiniteDifference
 from pysindy.feature_library import PolynomialLibrary, FourierLibrary
+from sklearn.metrics import mean_squared_error
 
 # Generate synthetic 1D data
 np.random.seed(42)
@@ -27,7 +28,7 @@ for param1 in param_range:
         model = SINDy(
             differentiation_method=FiniteDifference(order=2),
             feature_library=feature_library,
-            optimizer=STLSQ(threshold=0.2),
+            optimizer=ps.STLSQ(threshold=0.2),
             feature_names=["x"])
         model.fit(data, t=t)
 
