@@ -4,6 +4,8 @@
 make model.score() return different results for different (param1, param2) values
 at this point `chat_gpt_example.py` and `test_model.py` differ only in x
 
+discovery: `UserWarning: Sparsity parameter is too big (0.2) and eliminated all coefficients` is caused by `optimizer=ps.STLSQ(threshold=0.2)`
+
 
 https://github.com/AndreiRaceanu/Bachelor-Thesis
 
