@@ -15,7 +15,7 @@ from sklearn.metrics import mean_squared_error
 
 
 
-data_sine = np.linspace(-np.pi/2, np.pi/2, num=1000)
+data_sine = np.sin(np.linspace(-np.pi/2, np.pi/2, 1000))
 
 
 
@@ -34,8 +34,7 @@ TIME = np.linspace(0, 1, 1000)
 
 def get_model_and_data(param1, param2):
 
-    x = np.array(data_sine)
-    x_data = x
+    x_data = data_sine
     differentiation_method = ps.FiniteDifference(order=2)
     poly_lib = ps.PolynomialLibrary(degree=int(param1))
     trig_lib = ps.FourierLibrary(n_frequencies=int(param2))
