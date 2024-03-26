@@ -1,5 +1,8 @@
 # Licenta
 
+https://github.com/AndreiRaceanu/Bachelor-Thesis
+
+
 
 https://pysindy.readthedocs.io/en/latest/examples/2_introduction_to_sindy/example.html
 https://pygpgo.readthedocs.io/en/latest/
