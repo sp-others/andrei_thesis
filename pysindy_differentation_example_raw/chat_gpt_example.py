@@ -42,4 +42,4 @@ for param1 in param_range:
         # Compute MSE between true derivatives and predicted derivatives
         # mse = mean_squared_error(data, dxdt_pred)
 
-        print(f"Parameters: param1={param1}, param2={param2} Model Score (MSE): {model.score(data, metric=mean_squared_error)}")
+        print(f"param1={param1}, param2={param2} score: {model.score(data, metric=mean_squared_error)}")
