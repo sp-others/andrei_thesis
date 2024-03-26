@@ -64,7 +64,6 @@ gpgo = GPGO(surogate, acq, err,params)
 gpgo.run(max_iter = 20,init_evals=5)
 print(gpgo.GP.y)
 
-exit(0)
 
 
 from pysindy.utils import concat_sample_axis, drop_nan_samples

@@ -6,6 +6,11 @@ at this point `chat_gpt_example.py` and `test_model.py` differ only in x
 
 discovery: `UserWarning: Sparsity parameter is too big (0.2) and eliminated all coefficients` is caused by `optimizer=ps.STLSQ(threshold=0.2)`
 
+original data with seed 42: len(scores): 2
+x from chatgpt w/  noise: len(scores): 93
+x from chatgpt w/o noise: len(scores): 34
+original data with seed 42 w/ noise: len(scores): 80
+
 
 https://github.com/AndreiRaceanu/Bachelor-Thesis
 

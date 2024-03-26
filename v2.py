@@ -14,9 +14,9 @@ from sklearn.metrics import mean_squared_error
 # importarea modulelor necesare prelucrarii datelor, optimizarii bayesiene si gasirii ecuatiilor sistemului dinamic
 
 
+count = 1000
 def generate_data():
-    data_sine = np.linspace(-np.pi / 2, np.pi / 2, num=1000)
-    return np.array(data_sine)
+    return np.linspace(-np.pi / 2, np.pi / 2, num=count) + np.random.normal(scale=0.1, size=count)
 
 
 x_data = generate_data()
@@ -35,7 +35,7 @@ def err(param1, param2):
 # de parametri non-zero
 
 
-TIME = np.linspace(0, 1, 1000)
+TIME = np.linspace(0, 1, count)
 
 
 def get_model(param1, param2):
@@ -64,7 +64,6 @@ gpgo = GPGO(surogate, acq, err, params)
 gpgo.run(max_iter=20, init_evals=5)
 print(gpgo.GP.y)
 
-exit(0)
 
 from pysindy.utils import concat_sample_axis, drop_nan_samples
 from pysindy.pysindy import _adapt_to_multiple_trajectories, _comprehend_and_validate_inputs
@@ -128,7 +127,7 @@ best_eval = min(current_eval_list)
 best_params = params_list[np.where(current_eval_list == best_eval)][0]
 print(f'\nbest_params, best_eval={best_params, best_eval}')
 
-model, x_data = get_model_and_data(best_params[0], best_params[1])
+model = get_model(best_params[0], best_params[1])
 model.print()  # prints (x)'
 
 x_derivative_real = model.differentiate(x_data)
