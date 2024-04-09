@@ -10,20 +10,23 @@ from pyGPGO.covfunc import squaredExponential
 from pyGPGO.acquisition import Acquisition
 from pyGPGO.GPGO import GPGO
 from sklearn.metrics import mean_squared_error
-
+from pysindy.differentiation import SmoothedFiniteDifference
 #importarea modulelor necesare prelucrarii datelor, optimizarii bayesiene si gasirii ecuatiilor sistemului dinamic
 
 
 
-data_sine = np.sin(np.linspace(-np.pi/2, np.pi/2, 1000))
+data_sine = np.sin(np.linspace(-np.pi/2, np.pi/2, num=1000))
 
+alpha = 1
 
 
 def err(param1, param2):
     _model, x_data = get_model_and_data(param1, param2)
-    alpha = 1
     score = _model.score(x_data, metric=mean_squared_error) + alpha * _model.complexity
-    print(f'parametrii folositi in functie sunt acestea {param1,param2} \n')
+    print(f'Scorul functiei IN ERR este urmatorul {score} \n')
+    #print(f'parametrii folositi in functie sunt acestea {param1,param2} \n')
+    #print(f' modelul folosit in functie este urmatorul {_model}\n')
+
     return score
 
 # variabila score modeleaza performantele aproximarii, unde _model.complexity este un numar ce reprezinta numarul
@@ -31,11 +34,10 @@ def err(param1, param2):
 
 
 TIME = np.linspace(0, 1, 1000)
-
+x = np.array(data_sine)
+x_data = x
+differentiation_method = ps.FiniteDifference(order=2)
 def get_model_and_data(param1, param2):
-
-    x_data = data_sine
-    differentiation_method = ps.FiniteDifference(order=2)
     poly_lib = ps.PolynomialLibrary(degree=int(param1))
     trig_lib = ps.FourierLibrary(n_frequencies=int(param2))
     custom_lib = poly_lib + trig_lib
@@ -47,7 +49,15 @@ def get_model_and_data(param1, param2):
         optimizer=optimizer,
         feature_names=["x"])
     model.fit(x_data, t=TIME)
-    print(f'parametrii folositi in model sunt acestea{param1,param2}\n')
+    #print(f'parametrii folositi in model sunt acestea{param1,param2}\n')
+
+
+   # print(f'parametrii folositi de librariile pentru functii sunt acestea {poly_lib, trig_lib}')
+
+    #print(f' modelul folosit este urmatorul {model}\n')
+
+    print(f'scorul functiei IN MODEL  este urmatorul : {model.score(x_data, metric = mean_squared_error)  + alpha * model.complexity} ')
+
     return model, x_data
 
 
@@ -60,8 +70,7 @@ params = {'param1' : ('int',[2,100]),
           'param2' : ('int',[2,100])}
 np.random.seed(23)
 gpgo = GPGO(surogate, acq, err,params)
-gpgo.run(max_iter = 20,init_evals=5)
-print(gpgo.GP.y)
+gpgo.run(max_iter = 100,init_evals=20)
 
 
 
@@ -95,8 +104,8 @@ def get_x_dot_and_x_dot_predicted(_model, x, t=None, x_dot=None, u=None, multipl
     return x_dot, x_dot_predict
 
 
-params_list = gpgo.GP.X[3:]
-current_eval_list = gpgo.GP.y[3:]
+params_list = gpgo.GP.X[21:]
+current_eval_list = gpgo.GP.y[21:]
 
 t_list = list(range(1, len(params_list) + 1))
 param1_list = [point[0] for point in params_list]
@@ -129,8 +138,12 @@ print(f'\nbest_params, best_eval={best_params, best_eval}')
 model, x_data = get_model_and_data(best_params[0], best_params[1])
 model.print() # prints (x)'
 
-x_derivative_real = model.differentiate(x_data)
+   #x_derivative_real = model.differentiate(x_data)
 _, x_derivative_estimated = get_x_dot_and_x_dot_predicted(model, x_data) # NOTE that _ = x_derivative_real
+
+
+sfd = SmoothedFiniteDifference()
+x_derivative_real = sfd._differentiate(x_data,TIME)
 
 derivative_subplot = plst.figure().add_subplot()
 derivative_subplot.plot(TIME, x_derivative_real, label ="x_derivative_real")
@@ -140,10 +153,4 @@ derivative_subplot.legend()
 plst.show()
 
 
-
-
-
-
-#sa verific ca param1 si param 2 se fedeaza la fiecare iteratie a optimizarii bayesiene
-# optimizarea lui sindy si BO.
 # set de date/aplicatie public data sets for ML/kagel
