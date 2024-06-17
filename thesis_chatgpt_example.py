@@ -1,5 +1,6 @@
 import datetime
 import os
+import time
 
 import numpy as np
 import pandas as pd
@@ -99,9 +100,11 @@ gpgo = GPGO(surogate, acq, objective, param_bounds, n_jobs=CPU_CORES_FOR_GPGO)
 
 # Run Bayesian Optimization
 start_time = datetime.datetime.now().isoformat()
+start = time.time()
 print(start_time)
 gpgo.run(max_iter=GPGO_ITERATIONS)
 end_time = datetime.datetime.now().isoformat()
+end = time.time()
 
 # Get the best parameters
 best_params = gpgo.getResult()
@@ -129,6 +132,7 @@ print(f'GPGO with {GPGO_ITERATIONS} iterations ran from')
 print(start_time)
 print('to')
 print(end_time)
+print(f'Total time: {end - start} seconds')
 
 # Plot actual vs expected derivatives
 plt.figure()
