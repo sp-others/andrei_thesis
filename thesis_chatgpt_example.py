@@ -1,3 +1,6 @@
+import datetime
+import timeit
+
 import numpy as np
 import pandas as pd
 from pyGPGO.GPGO import GPGO
@@ -30,9 +33,6 @@ def objective(degree, n_frequencies, lambda_val, threshold):
     x_dot_predicted = model.fit(x, t=t).predict(x)
     error = np.mean((x_dot - x_dot_predicted) ** 2)
 
-    print(
-        f'Error: {error} for degree={degree}, n_frequencies={n_frequencies}, lambda_val={lambda_val}, threshold={threshold}')
-
     return -error
 
 
@@ -48,8 +48,11 @@ x = data1
 x_dot = np.gradient(data1, axis=0)  # Replace this with actual derivative if available
 
 # Define the parameter space
-param_bounds = {'degree': ('int', [2, 10]), 'n_frequencies': ('int', [2, 10]), 'lambda_val': ('cont', [1e-4, 1e-2]),
-                'threshold': ('cont', [1e-4, 1e-2])}
+int_bounds = [2, 10]
+cont_bounds = [1e-128, 1e-64]
+# TODO: find the type for lambda_val & threshold
+param_bounds = {'degree': ('int', int_bounds), 'n_frequencies': ('int', int_bounds), 'lambda_val': ('cont', cont_bounds),
+                'threshold': ('cont', cont_bounds)}
 
 # Set up Bayesian Optimization
 cov = squaredExponential()
@@ -63,7 +66,11 @@ gpgo = GPGO(surogate, acq, objective, param_bounds, n_jobs=13)
 #                             y_max=None)
 
 # Run Bayesian Optimization
-gpgo.run(max_iter=10)
+start_time = datetime.datetime.now().isoformat()
+print(start_time)
+GPGO_ITERATIONS = 20
+gpgo.run(max_iter=GPGO_ITERATIONS)
+end_time = datetime.datetime.now().isoformat()
 
 # Get the best parameters
 best_params = gpgo.getResult()
@@ -87,3 +94,7 @@ x_dot_predicted_best = best_model.predict(x)
 
 print("Best Model Predictions:")
 print(x_dot_predicted_best)
+print(f'GPGO with {GPGO_ITERATIONS} iterations ran from')
+print(start_time)
+print('to')
+print(end_time)
