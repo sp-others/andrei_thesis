@@ -133,3 +133,15 @@ plt.ylabel('Error')
 plt.legend()
 plt.title('Evolution of Error')
 plt.show()
+
+eeg_channels = ["CHF5", "CHFC1", "CHP5", "CHCP1", "CHP4", "CHPO8", "CHFP2", "CHFC6", "CHFZ", "CHPZ"]
+plt.figure(figsize=(12, len(eeg_channels)))
+for eeg_data in data1:
+    for i, channel in enumerate(eeg_channels):
+        plt.plot(t, data1[i], label=channel)
+
+plt.xlabel('Time (s)')
+plt.ylabel('Amplitude')
+plt.title('EEG Data from CSV')
+plt.legend(loc='upper right')
+plt.show()
