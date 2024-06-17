@@ -21,7 +21,7 @@ eeg_channels = ["CH_F5", "CH_FC1", "CH_P5", "CH_CP1", "CH_P4", "CH_PO8", "CH_FP2
 
 file1 = 'training_1.csv'
 file2 = 'training_2.csv'
-DATA_WIDTH = 10  # number of columns used from the csv file
+DATA_WIDTH = 9  # number of columns used from the csv file
 
 ALPHA = 0
 
@@ -72,7 +72,7 @@ data1 = read_data(file1, DATA_WIDTH)
 
 # Assuming time vector t and derivative x_dot are known
 # For the sake of this example, let's create synthetic ones
-t = np.linspace(0, 10, len(data1))
+t = np.linspace(1, len(data1), len(data1), dtype=int)
 x = data1
 x_dot = np.gradient(data1, axis=0)  # Replace this with actual derivative if available
 
@@ -180,8 +180,9 @@ plt.title('Evolution of Error')
 plt.show()
 
 plt.figure(figsize=(12, len(eeg_channels)))
+t_columns = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
 for i, eeg_data in enumerate(data1):
-    plt.plot(t, data1[i], label=eeg_channels[i])
+    plt.plot(t_columns, data1[i], label=eeg_channels[i])
 
 plt.xlabel('Time (s)')
 plt.ylabel('Amplitude')
@@ -189,10 +190,11 @@ plt.title('EEG Data from CSV')
 plt.legend(loc='upper right')
 plt.show()
 
+# Plot the data from the CSV file w/ bigger width
 data_big = read_data(file1, 400)
 
 width = len(data_big[0])
-t = np.linspace(0, width, width, dtype=int)
+t = np.linspace(1, width, width, dtype=int)
 plt.figure(figsize=(12, len(eeg_channels)))
 for i, eeg_data in enumerate(data_big):
     plt.plot(t, data_big[i], label=eeg_channels[i])
