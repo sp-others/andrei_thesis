@@ -16,6 +16,8 @@ DATA_WIDTH = 10  # number of columns used from the csv file
 
 ALPHA = 0
 
+int_bounds = [2, 10]
+cont_bounds = [1e-128, 1e-64]
 
 GPGO_ITERATIONS = 10
 CPU_CORES_FOR_GPGO = int(os.getenv('CPU_CORES_FOR_GPGO', 4))
@@ -46,6 +48,12 @@ def objective(degree, n_frequencies, lambda_val, threshold):
 
     x_dot_predicted = model.fit(x, t=t).predict(x)
     error = np.mean((x_dot - x_dot_predicted) ** 2) + ALPHA * model.complexity
+
+    # Store hyperparameters and error for plotting
+    global hyperparameter_history, error_history
+    hyperparameter_history.append((degree, n_frequencies, lambda_val, threshold))
+    error_history.append(error)
+
     return -error
 
 
@@ -59,11 +67,17 @@ x = data1
 x_dot = np.gradient(data1, axis=0)  # Replace this with actual derivative if available
 
 # Define the parameter space
-int_bounds = [2, 10]
-cont_bounds = [1e-128, 1e-64]
 # TODO: find the type for lambda_val & threshold
-param_bounds = {'degree': ('int', int_bounds), 'n_frequencies': ('int', int_bounds), 'lambda_val': ('cont', cont_bounds),
-                'threshold': ('cont', cont_bounds)}
+param_bounds = {
+    'degree': ('int', int_bounds),
+    'n_frequencies': ('int', int_bounds),
+    'lambda_val': ('cont', cont_bounds),
+    'threshold': ('cont', cont_bounds)
+}
+
+# Initialize history storage
+hyperparameter_history = []
+error_history = []
 
 # Set up Bayesian Optimization
 cov = squaredExponential()
