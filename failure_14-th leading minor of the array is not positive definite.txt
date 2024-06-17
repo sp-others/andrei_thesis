@@ -1,0 +1,39 @@
+import sys; print('Python %s on %s' % (sys.version, sys.platform))
+/e/others/andrei/2024-01-05_09-38-00/venv/bin/python -X pycache_prefix=/home/kamui/.cache/JetBrains/PyCharm2024.1/cpython-cache /mnt/e/linked/home/kamui/.local/share/JetBrains/Toolbox/apps/pycharm-professional/plugins/python/helpers/pydev/pydevd.py --multiprocess --qt-support=auto --client 127.0.0.1 --port 33085 --file /e/others/andrei/andrei_thesis/thesis_chatgpt_example.py
+Connected to pydev debugger (build 241.15989.155)
+Evaluation 	 Proposed point 	  Current eval. 	 Best eval.
+2024-06-17T19:58:03.620353
+init   	 [5.00000000e+00 9.00000000e+00 6.75487852e-65 9.13005907e-65]. 	  -31896.394941745337 	 -2326.394941745327
+init   	 [2.00000000e+00 8.00000000e+00 8.65854269e-65 6.18205207e-65]. 	  -2326.394941745327 	 -2326.394941745327
+init   	 [5.00000000e+00 5.00000000e+00 6.59766603e-65 6.90492687e-65]. 	  -31096.394941745282 	 -2326.394941745327
+1      	 [1.00000000e+01 2.00000000e+00 5.09475793e-65 1.56816789e-65]. 	  -1080584.3949417574 	 -2326.394941745327
+2      	 [1.00000000e+01 1.00000000e+01 5.62724956e-65 4.41176818e-65]. 	  -1080584.3949417574 	 -2326.394941745327
+3      	 [2.00000000e+00 2.00000000e+00 2.24190068e-65 7.35666957e-65]. 	  -1126.3949417453273 	 -1126.3949417453273
+4      	 [8.27577021e+00 6.03352945e+00 2.73998260e-65 5.13206774e-65]. 	  -433348.39494174515 	 -1126.3949417453273
+5      	 [5.40629487e+00 2.00000000e+00 1.99122161e-65 9.24455635e-65]. 	  -30496.394941745366 	 -1126.3949417453273
+6      	 [2.00000000e+00 4.27949634e+00 3.49212093e-65 3.54681647e-65]. 	  -1526.3949417453266 	 -1126.3949417453273
+7      	 [2.00000000e+00 1.00000000e+01 6.59018548e-66 2.75295509e-66]. 	  -2726.394941745327 	 -1126.3949417453273
+8      	 [2.00000000e+00 6.12184032e+00 8.92596996e-66 8.51924321e-65]. 	  -1926.394941745327 	 -1126.3949417453273
+9      	 [2.00000000e+00 2.95461698e+00 6.16671935e-65 7.14170835e-65]. 	  -1126.3949417453273 	 -1126.3949417453273
+10     	 [2.00000000e+00 2.00000000e+00 8.33201679e-65 2.15707533e-65]. 	  -1126.3949417453273 	 -1126.3949417453273
+Traceback (most recent call last):
+  File "/mnt/e/linked/home/kamui/.local/share/JetBrains/Toolbox/apps/pycharm-professional/plugins/python/helpers/pydev/pydevd.py", line 1535, in _exec
+    pydev_imports.execfile(file, globals, locals)  # execute the script
+  File "/mnt/e/linked/home/kamui/.local/share/JetBrains/Toolbox/apps/pycharm-professional/plugins/python/helpers/pydev/_pydev_imps/_pydev_execfile.py", line 18, in execfile
+    exec(compile(contents+"\n", file, 'exec'), glob, loc)
+  File "/e/others/andrei/andrei_thesis/thesis_chatgpt_example.py", line 68, in <module>
+    gpgo.run(max_iter=GPGO_ITERATIONS)
+  File "/e/others/andrei/2024-01-05_09-38-00/venv/lib/python3.10/site-packages/pyGPGO/GPGO.py", line 198, in run
+    self.updateGP()
+  File "/e/others/andrei/2024-01-05_09-38-00/venv/lib/python3.10/site-packages/pyGPGO/GPGO.py", line 153, in updateGP
+    self.GP.update(np.atleast_2d(self.best), np.atleast_1d(f_new))
+  File "/e/others/andrei/2024-01-05_09-38-00/venv/lib/python3.10/site-packages/pyGPGO/surrogates/GaussianProcess.py", line 240, in update
+    self.fit(X, y)
+  File "/e/others/andrei/2024-01-05_09-38-00/venv/lib/python3.10/site-packages/pyGPGO/surrogates/GaussianProcess.py", line 78, in fit
+    self.L = cholesky(self.K).T
+  File "/e/others/andrei/2024-01-05_09-38-00/venv/lib/python3.10/site-packages/scipy/linalg/_decomp_cholesky.py", line 89, in cholesky
+    c, lower = _cholesky(a, lower=lower, overwrite_a=overwrite_a, clean=True,
+  File "/e/others/andrei/2024-01-05_09-38-00/venv/lib/python3.10/site-packages/scipy/linalg/_decomp_cholesky.py", line 37, in _cholesky
+    raise LinAlgError("%d-th leading minor of the array is not positive "
+numpy.linalg.LinAlgError: 14-th leading minor of the array is not positive definite
+python-BaseException

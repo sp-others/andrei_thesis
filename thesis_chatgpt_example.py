@@ -1,18 +1,14 @@
 import datetime
-import timeit
-
 import numpy as np
 import pandas as pd
 from pyGPGO.GPGO import GPGO
 from pyGPGO.covfunc import squaredExponential
-from sklearn.model_selection import train_test_split
 from pysindy import SINDy, PolynomialLibrary, FourierLibrary, STLSQ
 from pyGPGO.surrogates.GaussianProcess import GaussianProcess
 from pyGPGO.acquisition import Acquisition
-from scipy.integrate import odeint
-from osqp import OSQP
 
 
+alpha = 0
 # Function to read the data
 def load_data(file1, file2):
     header = None
@@ -31,8 +27,7 @@ def objective(degree, n_frequencies, lambda_val, threshold):
     model = SINDy(feature_library=feature_library, optimizer=STLSQ(threshold=threshold, alpha=lambda_val))
 
     x_dot_predicted = model.fit(x, t=t).predict(x)
-    error = np.mean((x_dot - x_dot_predicted) ** 2)
-
+    error = np.mean((x_dot - x_dot_predicted) ** 2) + alpha * model.complexity
     return -error
 
 
