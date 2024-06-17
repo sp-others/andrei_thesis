@@ -10,6 +10,15 @@ from pysindy import SINDy, PolynomialLibrary, FourierLibrary, STLSQ
 from pyGPGO.surrogates.GaussianProcess import GaussianProcess
 from pyGPGO.acquisition import Acquisition
 
+
+"""
+channels:
+F5|FC1|P5|CP1|P4|PO8|FP2|FC6|FZ|PZ
+3p;7p;10p;18p;22p;36p;43p;46p;48p;57p
+"""
+
+eeg_channels = ["CH_F5", "CH_FC1", "CH_P5", "CH_CP1", "CH_P4", "CH_PO8", "CH_FP2", "CH_FC6", "CH_FZ", "CH_PZ"]
+
 file1 = 'training_1.csv'
 file2 = 'training_2.csv'
 DATA_WIDTH = 10  # number of columns used from the csv file
@@ -179,11 +188,9 @@ plt.legend()
 plt.title('Evolution of Error')
 plt.show()
 
-eeg_channels = ["CHF5", "CHFC1", "CHP5", "CHCP1", "CHP4", "CHPO8", "CHFP2", "CHFC6", "CHFZ", "CHPZ"]
 plt.figure(figsize=(12, len(eeg_channels)))
-for eeg_data in data1:
-    for i, channel in enumerate(eeg_channels):
-        plt.plot(t, data1[i], label=channel)
+for i, eeg_data in enumerate(data1):
+    plt.plot(t, data1[i], label=eeg_channels[i])
 
 plt.xlabel('Time (s)')
 plt.ylabel('Amplitude')
