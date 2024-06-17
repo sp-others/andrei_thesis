@@ -17,7 +17,8 @@ DATA_WIDTH = 10  # number of columns used from the csv file
 ALPHA = 0
 
 int_bounds = ('int', [2, 10])
-cont_bounds = ('cont', [1e-128, 1e-64])
+threshold_bounds = ('cont', [0, 0.1])
+alpha_bounds = ('cont', [0, 1e-12])
 
 GPGO_ITERATIONS = 10
 CPU_CORES_FOR_GPGO = int(os.getenv('CPU_CORES_FOR_GPGO', 4))
@@ -71,8 +72,8 @@ x_dot = np.gradient(data1, axis=0)  # Replace this with actual derivative if ava
 param_bounds = {
     'degree': int_bounds,
     'n_frequencies': int_bounds,
-    'lambda_val': cont_bounds,
-    'threshold': cont_bounds
+    'lambda_val': threshold_bounds,
+    'threshold': alpha_bounds
 }
 
 # Initialize history storage
