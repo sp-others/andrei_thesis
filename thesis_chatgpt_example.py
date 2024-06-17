@@ -10,6 +10,10 @@ from pyGPGO.surrogates.GaussianProcess import GaussianProcess
 from pyGPGO.acquisition import Acquisition
 
 
+file1 = 'training_1.csv'
+file2 = 'training_2.csv'
+DATA_WIDTH = 10  # number of columns used from the csv file
+
 ALPHA = 0
 
 
@@ -18,12 +22,18 @@ CPU_CORES_FOR_GPGO = int(os.getenv('CPU_CORES_FOR_GPGO', 4))
 
 
 # Function to read the data
-def load_data(file1, file2):
-    header = None
-    used_columns = list(range(1, 10 + 1))
-    data1 = pd.read_csv(file1, header=header, usecols=used_columns).values
-    data2 = pd.read_csv(file2, header=header, usecols=used_columns).values
-    return data1, data2
+def read_data(filename, last_column_number=None):
+    """
+    Read data from a CSV file
+    :param filename: the csv file that contains the data
+    :param last_column_number: if None, all columns are used, else only the first last_column_number columns are used
+    :return:
+    """
+    if last_column_number is None:
+        used_columns = None
+    else:
+        used_columns = list(range(1, last_column_number + 1))
+    return pd.read_csv(filename, header=None, usecols=used_columns).values
 
 
 # Define the objective function
@@ -40,9 +50,7 @@ def objective(degree, n_frequencies, lambda_val, threshold):
 
 
 # Load data
-file1 = 'training_1.csv'
-file2 = 'training_2.csv'
-data1, data2 = load_data(file1, file2)
+data1 = read_data(file1, DATA_WIDTH)
 
 # Assuming time vector t and derivative x_dot are known
 # For the sake of this example, let's create synthetic ones
