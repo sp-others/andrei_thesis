@@ -1,4 +1,6 @@
 import datetime
+import os
+
 import numpy as np
 import pandas as pd
 from pyGPGO.GPGO import GPGO
@@ -8,7 +10,13 @@ from pyGPGO.surrogates.GaussianProcess import GaussianProcess
 from pyGPGO.acquisition import Acquisition
 
 
-alpha = 0
+ALPHA = 0
+
+
+GPGO_ITERATIONS = 10
+CPU_CORES_FOR_GPGO = int(os.getenv('CPU_CORES_FOR_GPGO', 4))
+
+
 # Function to read the data
 def load_data(file1, file2):
     header = None
@@ -27,7 +35,7 @@ def objective(degree, n_frequencies, lambda_val, threshold):
     model = SINDy(feature_library=feature_library, optimizer=STLSQ(threshold=threshold, alpha=lambda_val))
 
     x_dot_predicted = model.fit(x, t=t).predict(x)
-    error = np.mean((x_dot - x_dot_predicted) ** 2) + alpha * model.complexity
+    error = np.mean((x_dot - x_dot_predicted) ** 2) + ALPHA * model.complexity
     return -error
 
 
@@ -54,16 +62,12 @@ cov = squaredExponential()
 surogate = GaussianProcess(cov)
 acq = Acquisition(mode='ExpectedImprovement')
 
-gpgo = GPGO(surogate, acq, objective, param_bounds, n_jobs=13)
-# gpgo = GPGO(f=objective,
-#                             domain=param_bounds,
-#                             acquisition='UCB',
-#                             y_max=None)
+print(f'Using {CPU_CORES_FOR_GPGO} CPU cores for GPGO')
+gpgo = GPGO(surogate, acq, objective, param_bounds, n_jobs=CPU_CORES_FOR_GPGO)
 
 # Run Bayesian Optimization
 start_time = datetime.datetime.now().isoformat()
 print(start_time)
-GPGO_ITERATIONS = 20
 gpgo.run(max_iter=GPGO_ITERATIONS)
 end_time = datetime.datetime.now().isoformat()
 
