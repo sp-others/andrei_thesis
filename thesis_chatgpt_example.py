@@ -22,7 +22,7 @@ eeg_channels = ["CH_F5", "CH_FC1", "CH_P5", "CH_CP1", "CH_P4", "CH_PO8", "CH_FP2
 
 file1 = 'training_1.csv'
 file2 = 'training_2.csv'
-DATA_WIDTH = 9  # number of columns used from the csv file
+DATA_WIDTH = 11  # number of columns used from the csv file
 
 ALPHA = 0
 
@@ -30,7 +30,7 @@ int_bounds = ('int', [2, 10])
 threshold_bounds = ('cont', [0, 0.1])
 alpha_bounds = ('cont', [0, 1e-12])
 
-GPGO_ITERATIONS = 10
+GPGO_ITERATIONS = 20
 CPU_CORES_FOR_GPGO = int(os.getenv('CPU_CORES_FOR_GPGO', 4))
 
 
