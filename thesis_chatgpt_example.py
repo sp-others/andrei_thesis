@@ -83,7 +83,7 @@ poly_library_best = PolynomialLibrary(degree=degree_best, include_bias=True)
 fourier_library_best = FourierLibrary(n_frequencies=n_frequencies_best)
 feature_library_best = poly_library_best + fourier_library_best
 
-best_model = SINDy(feature_library=poly_library_best, optimizer=STLSQ(threshold=threshold_best, alpha=lambda_best))
+best_model = SINDy(feature_library=feature_library_best, optimizer=STLSQ(threshold=threshold_best, alpha=lambda_best))
 best_model.fit(x, t=t)
 x_dot_predicted_best = best_model.predict(x)
 
