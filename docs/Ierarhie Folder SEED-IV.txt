@@ -1,0 +1,81 @@
+Exista 15 participanti.
+Fiecare participant a participat la 3 sesiuni.
+Fiecare sesiune are 24 de clipuri.
+
+Emotiile sunt clasificate in felul urmator : 
+
+
+
+
+informatii despre participanti : 
+
+female：
+sub3
+sub4
+sub5
+sub8
+sub9
+sub10
+sub11
+sub14
+sub15
+
+male:
+sub1
+sub2
+sub6
+sub7
+sub12
+sub13
+
+
+0 - neutru 
+1 - tristete
+2 - teama
+3 - fericire
+
+session1_label = [1,2,3,0,2,0,0,1,0,1,2,1,1,1,2,3,2,2,3,3,0,3,0,3];
+session2_label = [2,1,3,0,0,2,0,2,3,3,2,3,2,0,1,1,2,1,0,3,0,1,3,1];
+session3_label = [1,2,2,1,3,3,3,1,1,2,1,0,2,3,3,0,2,3,0,0,2,0,1,0];
+
+
+ierarhie folder eeg_raw_data : 
+
+3 foldere :
+fiecare folder contine 15  structuri matlab care contin reactiile subiectilor de test la 
+24 de clipuri, adica 24 de reactii, undele lor cerebrale, sub forma unei structuri cu 24 de campuri 
+
+ierarhie folder eeg_feature_smooth : 
+
+aceeasi ierarhie ca folderul nefiltrat, cu exceptia mentionabila ca fiecare fisier matlab contine o structura 
+
+
+
+Scopul licentei :
+
+Ii dau unui algoritm o unda cerebrala de la un eeg, si trebuie sa imi zica cum se simte
+omul respectiv.
+
+iau data_sample-urile de la participanti pentru clipurile asociate
+-fericirii
+-tristetii
+-fricii
+-neutru
+
+Si le sparg in 80% si 20% 
+
+
+atasez un camp la fiecare field, de la fiecare participant, in care ii pun ce emotie simte
+si apoi iterez prin cele 3 foldere, prin cei 15 participanti, iar la fiecare participant,
+iterez prin brainwave-ul de la fiecare clip, 24 clipuri, si daca apare 0 la emotie, este pus la folderul de Emotie_0, Emotie_1, Emotie_2, Emotie_3
+
+Iar apoi le sparg in 80 invatare, si 20 % validare pentru fiecare emotie;
+
+
+
+
+
+
+
+
+
