@@ -10,15 +10,14 @@ from pysindy import SINDy, PolynomialLibrary, FourierLibrary, STLSQ
 from pyGPGO.surrogates.GaussianProcess import GaussianProcess
 from pyGPGO.acquisition import Acquisition
 
-
 file1 = 'training_1.csv'
 file2 = 'training_2.csv'
 DATA_WIDTH = 10  # number of columns used from the csv file
 
 ALPHA = 0
 
-int_bounds = [2, 10]
-cont_bounds = [1e-128, 1e-64]
+int_bounds = ('int', [2, 10])
+cont_bounds = ('cont', [1e-128, 1e-64])
 
 GPGO_ITERATIONS = 10
 CPU_CORES_FOR_GPGO = int(os.getenv('CPU_CORES_FOR_GPGO', 4))
@@ -70,10 +69,10 @@ x_dot = np.gradient(data1, axis=0)  # Replace this with actual derivative if ava
 # Define the parameter space
 # TODO: find the type for lambda_val & threshold
 param_bounds = {
-    'degree': ('int', int_bounds),
-    'n_frequencies': ('int', int_bounds),
-    'lambda_val': ('cont', cont_bounds),
-    'threshold': ('cont', cont_bounds)
+    'degree': int_bounds,
+    'n_frequencies': int_bounds,
+    'lambda_val': cont_bounds,
+    'threshold': cont_bounds
 }
 
 # Initialize history storage
