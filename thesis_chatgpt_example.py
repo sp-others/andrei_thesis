@@ -130,23 +130,6 @@ print(start_time)
 print('to')
 print(end_time)
 
-# Refine the model with the best parameters
-degree_best = int(best_params[0]['degree'])
-n_frequencies_best = int(best_params[0]['n_frequencies'])
-lambda_best = best_params[0]['lambda_val']
-threshold_best = best_params[0]['threshold']
-
-poly_library_best = PolynomialLibrary(degree=degree_best, include_bias=True)
-fourier_library_best = FourierLibrary(n_frequencies=n_frequencies_best)
-feature_library_best = poly_library_best + fourier_library_best
-
-best_model = SINDy(feature_library=feature_library_best, optimizer=STLSQ(threshold=threshold_best, alpha=lambda_best))
-best_model.fit(x, t=t)
-x_dot_predicted_best = best_model.predict(x)
-
-print("Best Model Predictions:")
-print(x_dot_predicted_best)
-
 # Plot actual vs expected derivatives
 plt.figure()
 plt.plot(t, x_dot, label='Actual Derivative')
