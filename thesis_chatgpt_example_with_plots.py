@@ -8,13 +8,31 @@ from pyGPGO.surrogates.GaussianProcess import GaussianProcess
 from pyGPGO.acquisition import Acquisition
 
 
-# Function to read the data
-def load_data(file1, file2):
-    header = None
-    used_columns = list(range(1, 10 + 1))
-    data1 = pd.read_csv(file1, header=header, usecols=used_columns).values
-    data2 = pd.read_csv(file2, header=header, usecols=used_columns).values
-    return data1, data2
+file1 = 'training_1.csv'
+file2 = 'training_2.csv'
+DATA_WIDTH = 10  # number of columns used from the csv file
+
+# TODO: find the type for lambda_val & threshold
+int_bounds = ('int', [2, 10])
+cont_bounds = ('cont', [1e-128, 1e-64])
+
+
+MAX_GPGO_ITER = 20
+CPU_CORES_FOR_GPGO = 13
+
+
+def read_data(filename, last_column_number=None):
+    """
+    Read data from a CSV file
+    :param filename: the csv file that contains the data
+    :param last_column_number: if None, all columns are used, else only the first last_column_number columns are used
+    :return:
+    """
+    if last_column_number is None:
+        used_columns = None
+    else:
+        used_columns = list(range(1, last_column_number + 1))
+    return pd.read_csv(filename, header=None, usecols=used_columns).values
 
 
 # Define the objective function
@@ -27,7 +45,7 @@ def objective(degree, n_frequencies, lambda_val, threshold):
 
     model.fit(x, t=t)
     x_dot_predicted = model.predict(x)
-    error = np.mean((x_dot - x_dot_predicted) ** 2)
+    error = np.mean((x_dot - x_dot_predicted) ** 2) + ALPHA * model.complexity
 
     # Store hyperparameters and error for plotting
     global hyperparameter_history, error_history
@@ -38,9 +56,7 @@ def objective(degree, n_frequencies, lambda_val, threshold):
 
 
 # Load data
-file1 = 'training_1.csv'
-file2 = 'training_2.csv'
-data1, data2 = load_data(file1, file2)
+data1 = read_data(file1, DATA_WIDTH)
 
 # Assuming time vector t and derivative x_dot are known
 # For the sake of this example, let's create synthetic ones
@@ -49,11 +65,7 @@ x = data1
 x_dot = np.gradient(data1, axis=0)  # Replace this with actual derivative if available
 
 # Define the parameter space
-int_bounds = [2, 10]
-cont_bounds = [1e-128, 1e-64]
-# TODO: find the type for lambda_val & threshold
-param_bounds = {'degree': ('int', int_bounds), 'n_frequencies': ('int', int_bounds), 'lambda_val': ('cont', cont_bounds),
-                'threshold': ('cont', cont_bounds)}
+param_bounds = {'degree': int_bounds, 'n_frequencies': int_bounds, 'lambda_val': cont_bounds, 'threshold': cont_bounds}
 
 # Initialize history storage
 hyperparameter_history = []
@@ -65,10 +77,10 @@ cov = squaredExponential()
 surogate = GaussianProcess(cov)
 acq = Acquisition(mode='ExpectedImprovement')
 
-gpgo = GPGO(surogate, acq, objective, param_bounds, n_jobs=13)
+gpgo = GPGO(surogate, acq, objective, param_bounds, n_jobs=CPU_CORES_FOR_GPGO)
 
 # Run Bayesian Optimization
-gpgo.run(max_iter=10)
+gpgo.run(max_iter=MAX_GPGO_ITER)
 
 # Get the best parameters
 best_params = gpgo.getResult()
@@ -139,6 +151,20 @@ plt.figure(figsize=(12, len(eeg_channels)))
 for eeg_data in data1:
     for i, channel in enumerate(eeg_channels):
         plt.plot(t, data1[i], label=channel)
+
+plt.xlabel('Time (s)')
+plt.ylabel('Amplitude')
+plt.title('EEG Data from CSV')
+plt.legend(loc='upper right')
+plt.show()
+
+data_big = read_data(file1, 400)
+
+width = len(data_big[0])
+t = np.linspace(0, width, width, dtype=int)
+plt.figure(figsize=(12, len(eeg_channels)))
+for i, eeg_data in enumerate(data_big):
+    plt.plot(t, data_big[i], label=eeg_channels[i])
 
 plt.xlabel('Time (s)')
 plt.ylabel('Amplitude')
