@@ -12,6 +12,8 @@ file1 = 'training_1.csv'
 file2 = 'training_2.csv'
 DATA_WIDTH = 10  # number of columns used from the csv file
 
+ALPHA = 0
+
 # TODO: find the type for lambda_val & threshold
 int_bounds = ('int', [2, 10])
 cont_bounds = ('cont', [1e-128, 1e-64])
