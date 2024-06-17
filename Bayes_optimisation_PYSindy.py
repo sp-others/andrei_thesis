@@ -19,10 +19,14 @@ data_sine = np.sin(np.linspace(-np.pi/2, np.pi/2, num=1000))
 
 alpha = 1
 
+score_err = []
+score_model = []
+
 
 def err(param1, param2):
     _model, x_data = get_model_and_data(param1, param2)
     score = _model.score(x_data, metric=mean_squared_error) + alpha * _model.complexity
+    score_err.append(score)
     print(f'Scorul functiei IN ERR este urmatorul {score} \n')
     #print(f'parametrii folositi in functie sunt acestea {param1,param2} \n')
     #print(f' modelul folosit in functie este urmatorul {_model}\n')
@@ -56,7 +60,9 @@ def get_model_and_data(param1, param2):
 
     #print(f' modelul folosit este urmatorul {model}\n')
 
-    print(f'scorul functiei IN MODEL  este urmatorul : {model.score(x_data, metric = mean_squared_error)  + alpha * model.complexity} ')
+    score = model.score(x_data, metric=mean_squared_error) + alpha * model.complexity
+    score_model.append(score)
+    print(f'scorul functiei IN MODEL  este urmatorul : {score} ')
 
     return model, x_data
 
@@ -150,7 +156,17 @@ derivative_subplot.plot(TIME, x_derivative_real, label ="x_derivative_real")
 derivative_subplot.plot(TIME, x_derivative_estimated, label ="x_derivative_estimated")
 derivative_subplot.legend()
 
+score_start = 21
+score_range = list(range(-20 + score_start, 100))
+score_subplot = plst.figure().add_subplot()
+score_subplot.plot(score_range, score_err[score_start:], label="err_score")
+score_subplot.plot(score_range, score_model[score_start:-1], label="model_score")
+# observation: they are the same
+# observation 2: this is just current_eval plot
+score_subplot.legend()
+
 plst.show()
 
+print()  # for debug breakpoint
 
 # set de date/aplicatie public data sets for ML/kagel
