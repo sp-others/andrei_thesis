@@ -3,6 +3,7 @@ import os
 
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
 from pyGPGO.GPGO import GPGO
 from pyGPGO.covfunc import squaredExponential
 from pysindy import SINDy, PolynomialLibrary, FourierLibrary, STLSQ
@@ -119,3 +120,87 @@ print(f'GPGO with {GPGO_ITERATIONS} iterations ran from')
 print(start_time)
 print('to')
 print(end_time)
+
+# Refine the model with the best parameters
+degree_best = int(best_params[0]['degree'])
+n_frequencies_best = int(best_params[0]['n_frequencies'])
+lambda_best = best_params[0]['lambda_val']
+threshold_best = best_params[0]['threshold']
+
+poly_library_best = PolynomialLibrary(degree=degree_best, include_bias=True)
+fourier_library_best = FourierLibrary(n_frequencies=n_frequencies_best)
+feature_library_best = poly_library_best + fourier_library_best
+
+best_model = SINDy(feature_library=feature_library_best, optimizer=STLSQ(threshold=threshold_best, alpha=lambda_best))
+best_model.fit(x, t=t)
+x_dot_predicted_best = best_model.predict(x)
+
+print("Best Model Predictions:")
+print(x_dot_predicted_best)
+
+# Plot actual vs expected derivatives
+plt.figure()
+plt.plot(t, x_dot, label='Actual Derivative')
+plt.plot(t, x_dot_predicted_best, label='Predicted Derivative')
+plt.xlabel('Time')
+plt.ylabel('Derivative')
+plt.legend()
+plt.title('Actual vs. Predicted Derivative')
+plt.show()
+
+# Plot evolution of hyperparameters
+hyperparameter_history = np.array(hyperparameter_history)
+plt.figure()
+plt.plot(hyperparameter_history[:, 0], label='Degree')
+plt.plot(hyperparameter_history[:, 1], label='n_frequencies')
+plt.xlabel('Iteration')
+plt.ylabel('Hyperparameter Value')
+plt.legend()
+plt.title('Evolution of Hyperparameters (Degree & n_frequencies)')
+plt.show()
+
+# Plot evolution of hyperparameters
+hyperparameter_history = np.array(hyperparameter_history)
+plt.figure()
+plt.plot(hyperparameter_history[:, 2], label='lambda_val (log scale)')
+plt.plot(hyperparameter_history[:, 3], label='threshold (log scale)')
+plt.xlabel('Iteration')
+plt.ylabel('Hyperparameter Value')
+plt.legend()
+plt.title('Evolution of Hyperparameters (lambda_val & threshold)')
+plt.show()
+
+# Plot evolution of error
+plt.figure()
+plt.plot(error_history, label='Error')
+plt.xlabel('Iteration')
+plt.ylabel('Error')
+plt.legend()
+plt.title('Evolution of Error')
+plt.show()
+
+eeg_channels = ["CHF5", "CHFC1", "CHP5", "CHCP1", "CHP4", "CHPO8", "CHFP2", "CHFC6", "CHFZ", "CHPZ"]
+plt.figure(figsize=(12, len(eeg_channels)))
+for eeg_data in data1:
+    for i, channel in enumerate(eeg_channels):
+        plt.plot(t, data1[i], label=channel)
+
+plt.xlabel('Time (s)')
+plt.ylabel('Amplitude')
+plt.title('EEG Data from CSV')
+plt.legend(loc='upper right')
+plt.show()
+
+data_big = read_data(file1, 400)
+
+width = len(data_big[0])
+t = np.linspace(0, width, width, dtype=int)
+plt.figure(figsize=(12, len(eeg_channels)))
+for i, eeg_data in enumerate(data_big):
+    plt.plot(t, data_big[i], label=eeg_channels[i])
+
+plt.xlabel('Time (s)')
+plt.ylabel('Amplitude')
+plt.title('EEG Data from CSV')
+plt.legend(loc='upper right')
+plt.show()

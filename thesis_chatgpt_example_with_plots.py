@@ -19,7 +19,7 @@ int_bounds = ('int', [2, 10])
 cont_bounds = ('cont', [1e-128, 1e-64])
 
 
-MAX_GPGO_ITER = 20
+MAX_GPGO_ITER = 10
 CPU_CORES_FOR_GPGO = 13
 
 
@@ -93,8 +93,8 @@ print(best_params)
 # Refine the model with the best parameters
 degree_best = int(best_params[0]['degree'])
 n_frequencies_best = int(best_params[0]['n_frequencies'])
-lambda_best = 10 ** best_params[0]['lambda_val']
-threshold_best = 10 ** best_params[0]['threshold']
+lambda_best = best_params[0]['lambda_val']
+threshold_best = best_params[0]['threshold']
 
 poly_library_best = PolynomialLibrary(degree=degree_best, include_bias=True)
 fourier_library_best = FourierLibrary(n_frequencies=n_frequencies_best)
