@@ -11,7 +11,6 @@ from pysindy import SINDy, PolynomialLibrary, FourierLibrary, STLSQ
 from pyGPGO.surrogates.GaussianProcess import GaussianProcess
 from pyGPGO.acquisition import Acquisition
 
-
 """
 channels:
 F5|FC1|P5|CP1|P4|PO8|FP2|FC6|FZ|PZ
@@ -146,7 +145,6 @@ plt.savefig('out/derivative-comparison.png', bbox_inches='tight')
 plt.title('Actual vs. Predicted Derivative')
 plt.show()
 
-
 hyperparameter_history = np.array(hyperparameter_history)
 # Plot evolution of hyperparameters (degree & n_frequencies)
 plt.figure()
@@ -191,7 +189,7 @@ plt.show()
 plt.figure(figsize=(12, len(eeg_channels)))
 t_columns = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
 for i, eeg_data in enumerate(data):
-    plt.plot(t_columns, data[i], label=eeg_channels[i])
+    plt.plot(t_columns, data[i], label=f'{i + 1:00}: {eeg_channels[i]}')
 
 plt.xlabel('Time (s)')
 plt.ylabel('Amplitude')
@@ -207,7 +205,7 @@ width = len(data_big[0])
 t = np.linspace(1, width, width, dtype=int)
 plt.figure(figsize=(12, len(eeg_channels)))
 for i, eeg_data in enumerate(data_big):
-    plt.plot(t, data_big[i], label=eeg_channels[i])
+    plt.plot(t, data_big[i], label=f'{i + 1:00}: {eeg_channels[i]}')
 
 plt.xlabel('Time (s)')
 plt.ylabel('Amplitude')
