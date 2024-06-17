@@ -140,26 +140,34 @@ plt.legend()
 plt.title('Actual vs. Predicted Derivative')
 plt.show()
 
-# Plot evolution of hyperparameters
+
 hyperparameter_history = np.array(hyperparameter_history)
+# Plot evolution of hyperparameters (degree & n_frequencies)
 plt.figure()
-plt.plot(hyperparameter_history[:, 0], label='Degree')
+plt.plot(hyperparameter_history[:, 0], label='degree')
 plt.plot(hyperparameter_history[:, 1], label='n_frequencies')
 plt.xlabel('Iteration')
 plt.ylabel('Hyperparameter Value')
 plt.legend()
-plt.title('Evolution of Hyperparameters (Degree & n_frequencies)')
+plt.title('Evolution of Hyperparameters (degree & n_frequencies)')
 plt.show()
 
-# Plot evolution of hyperparameters
-hyperparameter_history = np.array(hyperparameter_history)
+# Plot evolution of hyperparameters (lambda_val)
 plt.figure()
-plt.plot(hyperparameter_history[:, 2], label='lambda_val (log scale)')
-plt.plot(hyperparameter_history[:, 3], label='threshold (log scale)')
+plt.plot(hyperparameter_history[:, 2], label='lambda_val')
 plt.xlabel('Iteration')
 plt.ylabel('Hyperparameter Value')
 plt.legend()
-plt.title('Evolution of Hyperparameters (lambda_val & threshold)')
+plt.title('Evolution of Hyperparameters (lambda_val)')
+plt.show()
+
+# Plot evolution of hyperparameters (threshold)
+plt.figure()
+plt.plot(hyperparameter_history[:, 3], label='threshold')
+plt.xlabel('Iteration')
+plt.ylabel('Hyperparameter Value')
+plt.legend()
+plt.title('Evolution of Hyperparameters (threshold)')
 plt.show()
 
 # Plot evolution of error
