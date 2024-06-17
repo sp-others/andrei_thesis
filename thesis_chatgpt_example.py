@@ -48,7 +48,7 @@ x = data1
 x_dot = np.gradient(data1, axis=0)  # Replace this with actual derivative if available
 
 # Define the parameter space
-param_bounds = {'degree': ('int', [1, 5]), 'n_frequencies': ('int', [1, 10]), 'lambda_val': ('cont', [1e-4, 1e-2]),
+param_bounds = {'degree': ('int', [2, 10]), 'n_frequencies': ('int', [2, 10]), 'lambda_val': ('cont', [1e-4, 1e-2]),
                 'threshold': ('cont', [1e-4, 1e-2])}
 
 # Set up Bayesian Optimization
@@ -56,7 +56,7 @@ cov = squaredExponential()
 surogate = GaussianProcess(cov)
 acq = Acquisition(mode='ExpectedImprovement')
 
-gpgo = GPGO(surogate, acq, objective, param_bounds, n_jobs=10)
+gpgo = GPGO(surogate, acq, objective, param_bounds, n_jobs=13)
 # gpgo = GPGO(f=objective,
 #                             domain=param_bounds,
 #                             acquisition='UCB',
@@ -81,8 +81,7 @@ poly_library_best = PolynomialLibrary(degree=degree_best, include_bias=True)
 fourier_library_best = FourierLibrary(n_frequencies=n_frequencies_best)
 feature_library_best = poly_library_best + fourier_library_best
 
-best_model = SINDy(feature_library=feature_library_best,
-                   optimizer=OSQP(lambda_val=lambda_best, threshold=threshold_best))
+best_model = SINDy(feature_library=poly_library_best, optimizer=STLSQ(threshold=threshold_best, alpha=lambda_best))
 best_model.fit(x, t=t)
 x_dot_predicted_best = best_model.predict(x)
 
