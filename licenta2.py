@@ -216,6 +216,6 @@ print('to')
 print(end_time)
 print(f'Total time: {end - start} seconds')
 
-plot_derivatives('training_1.csv', x_dot, x_dot_predicted_best)
-plot_hyperparams_and_error()
 plot_data()
+plot_hyperparams_and_error()
+plot_derivatives('training_1.csv', x_dot, x_dot_predicted_best)
