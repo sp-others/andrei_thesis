@@ -94,7 +94,7 @@ def plot_derivatives(file_name, actual_derivative, expected_derivative):
         plt.xlabel('Time')
         plt.ylabel('Derivative')
         plt.title(f'{derivative_type} Derivative for {file_name}')
-        plt.savefig(f'out/derivative_{file_name}_{derivative_type}.png', bbox_inches='tight')
+        plt.savefig(f'out/derivative_{file_name}_full_{derivative_type}.png', bbox_inches='tight')
         plt.show()
     # plot a plot for each set of channels from both derivatives
     for i, channel in enumerate(eeg_channels):
@@ -110,8 +110,11 @@ def plot_derivatives(file_name, actual_derivative, expected_derivative):
 
 
 def plot_hyperparams_and_error():
-    global hyperparameter_history
+    global hyperparameter_history, plot_hyperparams_and_error_runs
     hyperparameter_history_as_np_array = np.array(hyperparameter_history)
+    plot_hyperparams_and_error_runs += 1
+    savefig_prefix = f'out/hyperparams_and_error_{plot_hyperparams_and_error_runs}'
+
     # Plot evolution of hyperparameters (degree & n_frequencies)
     plt.figure()
     plt.plot(hyperparameter_history_as_np_array[:, 0], label='degree')
@@ -120,7 +123,7 @@ def plot_hyperparams_and_error():
     plt.ylabel('Hyperparameter Value')
     plt.legend()
     plt.title('Evolution of Hyperparameters (degree & n_frequencies)')
-    plt.savefig('out/hyperparams_degree_and_n_frequencies.png', bbox_inches='tight')
+    plt.savefig(f'{savefig_prefix}_degree_and_n_frequencies.png', bbox_inches='tight')
     plt.show()
     # Plot evolution of hyperparameters (lambda_val)
     plt.figure()
@@ -129,7 +132,7 @@ def plot_hyperparams_and_error():
     plt.ylabel('Hyperparameter Value')
     plt.legend()
     plt.title('Evolution of Hyperparameters (lambda_val)')
-    plt.savefig('out/hyperparams_lambda_val.png', bbox_inches='tight')
+    plt.savefig(f'{savefig_prefix}_lambda_val.png', bbox_inches='tight')
     plt.show()
     # Plot evolution of hyperparameters (threshold)
     plt.figure()
@@ -138,7 +141,7 @@ def plot_hyperparams_and_error():
     plt.ylabel('Hyperparameter Value')
     plt.legend()
     plt.title('Evolution of Hyperparameters (threshold)')
-    plt.savefig('out/hyperparams_threshold.png', bbox_inches='tight')
+    plt.savefig(f'{savefig_prefix}_threshold.png', bbox_inches='tight')
     plt.show()
     # Plot evolution of error
     plt.figure()
@@ -147,6 +150,7 @@ def plot_hyperparams_and_error():
     plt.ylabel('Error')
     plt.legend()
     plt.title('Evolution of Error')
+    plt.savefig(f'out/error{plot_hyperparams_and_error_runs}_threshold.png', bbox_inches='tight')
     plt.show()
 
 
@@ -183,6 +187,8 @@ def run_gpgo_and_get_results(data):
 
     return gpgo.getResult()
 
+
+plot_hyperparams_and_error_runs = 0
 
 # Load data
 file_names = ['training_1.csv', 'training_2.csv', 'validation_1.csv']
