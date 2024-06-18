@@ -67,6 +67,29 @@ def objective(degree, n_frequencies, lambda_val, threshold):
     return -error
 
 
+def plot_derivatives(file_name, actual_derivative, expected_derivative):
+    # plot the 2 derivatives, fully
+    for derivative_type, derivative in {'actual': actual_derivative, 'expected': expected_derivative}.items():
+        plt.figure()
+        plt.plot(t, derivative)
+        plt.xlabel('Time')
+        plt.ylabel('Derivative')
+        plt.title(f'{derivative_type} Derivative for {file_name}')
+        plt.savefig(f'out/derivative_{file_name}_{derivative_type}.png', bbox_inches='tight')
+        plt.show()
+    # plot a plot for each set of channels from both derivatives
+    for i, channel in enumerate(eeg_channels):
+        plt.figure(figsize=(12, len(eeg_channels)))
+        plt.plot(t_columns, actual_derivative[i], label=f'{channel} actual derivative')
+        plt.plot(t_columns, expected_derivative[i], label=f'{channel} expected derivative')
+        plt.xlabel('Time (s)')
+        plt.ylabel('Amplitude')
+        plt.title(f'actual vs expected for data {file_name} for channel {channel}')
+        plt.legend(loc='upper right')
+        plt.savefig(f'out/derivative_{file_name}_{channel}.png', bbox_inches='tight')
+        plt.show()
+
+
 # Load data
 file_names = ['training_1.csv', 'training_2.csv', 'validation_1.csv']
 data_dict = {file_name: read_data(file_name, DATA_WIDTH) for file_name in file_names}
@@ -137,29 +160,6 @@ print(start_time)
 print('to')
 print(end_time)
 print(f'Total time: {end - start} seconds')
-
-
-def plot_derivatives(name, actual_derivative, expected_derivative):
-    # plot the 2 derivatives, fully
-    for derivative_type, derivative in {'actual': actual_derivative, 'expected': expected_derivative}.items():
-        plt.figure()
-        plt.plot(t, derivative)
-        plt.xlabel('Time')
-        plt.ylabel('Derivative')
-        plt.title(f'{derivative_type} Derivative for {name}')
-        plt.savefig(f'out/derivative_{name}_{derivative_type}.png', bbox_inches='tight')
-        plt.show()
-    # plot a plot for each set of channels from both derivatives
-    for i, channel in enumerate(eeg_channels):
-        plt.figure(figsize=(12, len(eeg_channels)))
-        plt.plot(t_columns, actual_derivative[i], label=f'{channel} actual derivative')
-        plt.plot(t_columns, expected_derivative[i], label=f'{channel} expected derivative')
-        plt.xlabel('Time (s)')
-        plt.ylabel('Amplitude')
-        plt.title(f'actual vs expected for data {name} for channel {channel}')
-        plt.legend(loc='upper right')
-        plt.savefig(f'out/derivative_{name}_{channel}.png', bbox_inches='tight')
-        plt.show()
 
 
 # Plot derivatives for data1
