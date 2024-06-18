@@ -88,9 +88,9 @@ def get_fitted_model(x, degree, lambda_val, n_frequencies, threshold):
     return model.fit(x, t=t)
 
 
-def plot_derivatives(file_name, expected_derivative, actual_derivative):
+def plot_derivatives(file_name, computed_derivative, predicted):
     # plot the 2 derivatives, fully
-    for derivative_type, derivative in {'actual': actual_derivative, 'expected': expected_derivative}.items():
+    for derivative_type, derivative in {'predicted': predicted, 'computed': computed_derivative}.items():
         plt.figure()
         plt.plot(t, derivative)
         plt.xlabel('Time')
@@ -101,11 +101,11 @@ def plot_derivatives(file_name, expected_derivative, actual_derivative):
     # plot a plot for each set of channels from both derivatives
     for i, channel in enumerate(eeg_channels):
         plt.figure(figsize=(12, len(eeg_channels)))
-        plt.plot(t_columns, actual_derivative[i], label=f'{channel} actual derivative')
-        plt.plot(t_columns, expected_derivative[i], label=f'{channel} expected derivative')
+        plt.plot(t_columns, predicted[i], label=f'{channel} predicted derivative')
+        plt.plot(t_columns, computed_derivative[i], label=f'{channel} computed derivative')
         plt.xlabel('Time (s)')
         plt.ylabel('Amplitude')
-        plt.title(f'actual vs expected for data {file_name} for channel {channel}')
+        plt.title(f'predicted vs computed for data {file_name} for channel {channel}')
         plt.legend(loc='upper right')
         plt.savefig(f'out/derivative_{file_name}_{channel}.png', bbox_inches='tight')
         plt.show() if SHOW_PLOTS else plt.close()
@@ -204,7 +204,7 @@ data3 = data_dict['validation_1.csv']
 t = np.linspace(1, len(data1), len(data1), dtype=int)
 t_columns = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
 # x = data1
-# x_dot = np.gradient(data1, axis=0)  # Replace this with actual derivative if available
+# x_dot = np.gradient(data1, axis=0)  # Replace this with computed derivative if available
 
 # Define the parameter space
 # TODO: find the type for lambda_val & threshold
@@ -260,3 +260,7 @@ data2_error, model2, data2_x_dot, data2_x_dot_predicted = get_error_and_derivati
                                                                                     threshold_best)
 plot_derivatives('training_2.csv', data2_x_dot, data2_x_dot_predicted)
 plot_hyperparams_and_error()
+
+best_params2 = run_gpgo_and_get_results(data2)
+
+print()
