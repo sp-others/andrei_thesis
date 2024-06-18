@@ -1,6 +1,37 @@
 # Licenta
 https://github.com/AndreiRaceanu/Bachelor-Thesis
 
+# TODO: 2024 06 18 18:40
+
+Observatie : 
+In acest document, M_1 se refera la prima matrice de training din data_set, de 10 * nr de coloane computational fezabile
+In acest document. M_2 se refeta la a doua matrice de trainning din data_set, de 10 * nr de coloane computational fezabile
+prin derivata matricii M_n, ma refer la derivata numerica, reala, a celor 10 channeluri din matrice.
+se cere:
+
+1. grafic M_1
+2. GRafic M_2
+3. Grafic derivata Matricii M_1, reala.
+4. Grafic derivata Matricii M_2, reala.
+5. Grafic derivata aproximata a Matricii M_1.
+6. Grafic derivata aproximata a Matricii M_2.
+7. GRafic derivata aproximata vs derivata reala pentru 2 canale matricea 1.
+8. grafic derivata aproximata vs derivata reala pentru 2 canale matricea 2.
+9. Graficul erorii in timp, ordonata descrescator; Se iau erorile, se sorteaza descrescator, se afiseaza eroarea in functie de timp.
+10. Graficul evolutiei hiperparametrilor in timp pentru cei 2 hipr subunitari.
+11. Graficul pentru hiperparametrii > 1 pentru cei 2 hiperparametrii >1.
+12. !!!! pentru antrenarea lui M_2, trebuie sa se foloseasca printre parametrii, solutia optimala de la antrenarea lui M_1, adica tuplul jipeparametrilor pentru care eroarea era minima.----> folosesti SINDY pe setul de param cei mai buni la 1, obtii o eroare.
+13. !!!!dupa antrenarea cu M_2, se inlocuieste tuplyl parametrilor cei mai buni, cu noua solutie, doar ca de data asta,
+in LISTA ERORILOR incluzi si eroarea obtinuta cu hiperparametrii de la 1.,  apoi sortezi iar descrescator erorile, incluzand si eroarea calculata de tine in manual.
+
+    iei tuplul de parametrii care au eroarea cea mai mica;
+14. Se face validation, se aproximeaza aceeasi dimensiunea din M_3, matricea validation, folosind DOAR hiperparametrii gasiti anterior.
+15. Se face graficul lui M_3.
+16. GRaficul lui M_3 derivat.
+17. Graficele de eroare, dintre M_3 derivat aproximat si real.
+18. Graficele cu 2 channele apxoimate si derivate din M_3.
+
+
 
 ## thesis chatgpt example prompt:
 ```
