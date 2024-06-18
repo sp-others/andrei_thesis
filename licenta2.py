@@ -245,6 +245,10 @@ if 429 Too Many Requests is thrown by PyCharm when plotting the graphs, then
 https://youtrack.jetbrains.com/issue/PY-43687/Problems-with-many-plots-in-scientific-view#focus=Comments-27-6266042.0-0
 """
 
+# make sure the out dir exists
+if not os.path.exists('out'):
+    os.makedirs('out')
+
 plot_data()
 plot_hyperparams_and_error()
 plot_derivatives('training_1.csv', data1_x_dot, data1_x_dot_predicted)
