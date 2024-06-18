@@ -60,7 +60,7 @@ def get_objective_function(x):
     return objective
 
 
-def get_error_and_derivatives(x, degree, lambda_val, n_frequencies, threshold):
+def get_error_and_derivatives(x, degree, lambda_val, n_frequencies, threshold, save_metadata=True):
     x_dot = np.gradient(x, axis=0)
     model = get_fitted_model(x, degree, lambda_val, n_frequencies, threshold)
     x_dot_predicted = model.predict(x)
@@ -68,9 +68,10 @@ def get_error_and_derivatives(x, degree, lambda_val, n_frequencies, threshold):
     error = -np.mean((x_dot - x_dot_predicted) ** 2) + ALPHA * model.complexity
 
     # Store hyperparameters and error for plotting
-    global hyperparameter_history, error_history
-    hyperparameter_history.append((degree, n_frequencies, lambda_val, threshold))
-    error_history.append(error)
+    if save_metadata:
+        global hyperparameter_history, error_history
+        hyperparameter_history.append((degree, n_frequencies, lambda_val, threshold))
+        error_history.append(error)
 
     return error, x_dot, x_dot_predicted
 
@@ -214,7 +215,7 @@ threshold_best = best_params[0]['threshold']
 
 data1_error, data1_x_dot, data1_x_dot_predicted = get_error_and_derivatives(data1, degree_best, lambda_best,
                                                                             n_frequencies_best,
-                                                                            threshold_best)
+                                                                            threshold_best, save_metadata=False)
 
 print("Best Model Predictions:")
 print(data1_x_dot_predicted)
