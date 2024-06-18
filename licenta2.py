@@ -19,8 +19,6 @@ F5|FC1|P5|CP1|P4|PO8|FP2|FC6|FZ|PZ
 
 eeg_channels = ["CH_F5", "CH_FC1", "CH_P5", "CH_CP1", "CH_P4", "CH_PO8", "CH_FP2", "CH_FC6", "CH_FZ", "CH_PZ"]
 
-file1 = 'training_1.csv'
-file2 = 'training_2.csv'
 DATA_WIDTH = 11  # number of columns used from the csv file
 
 ALPHA = 1
@@ -196,11 +194,15 @@ plot_hyperparams_and_error_runs = 0
 plot_derivatives_runs = 0
 
 # Load data
-file_names = ['training_1.csv', 'training_2.csv', 'validation_1.csv']
+
+file1 = 'training_1.csv'
+file2 = 'training_2.csv'
+file3 = 'validation_1.csv'
+file_names = [file1, file2, file3]
 data_dict = {file_name: read_data(file_name, DATA_WIDTH) for file_name in file_names}
-data1 = data_dict['training_1.csv']
-data2 = data_dict['training_2.csv']
-data3 = data_dict['validation_1.csv']
+data1 = data_dict[file1]
+data2 = data_dict[file2]
+data3 = data_dict[file3]
 
 # Assuming time vector t and derivative x_dot are known
 # For the sake of this example, let's create synthetic ones
@@ -256,13 +258,13 @@ if not os.path.exists('out'):
 
 plot_data()
 plot_hyperparams_and_error()
-plot_derivatives('training_1.csv', data1_x_dot, data1_x_dot_predicted)
+plot_derivatives(file1, data1_x_dot, data1_x_dot_predicted)
 data2_error, model2, data2_x_dot, data2_x_dot_predicted = get_error_and_derivatives(model1, data2, degree_best,
                                                                                     lambda_best,
                                                                                     n_frequencies_best,
                                                                                     threshold_best)
 plot_hyperparams_and_error()
-plot_derivatives('training_2.csv', data2_x_dot, data2_x_dot_predicted)
+plot_derivatives(file2, data2_x_dot, data2_x_dot_predicted)
 print("plotted graphs after 1st GPGO run")
 
 best_params2 = run_gpgo_and_get_results(data2)
@@ -290,7 +292,7 @@ data1_error, model1, data1_x_dot, data1_x_dot_predicted = get_error_model_and_de
                                                                                           save_metadata=False)
 plot_derivatives_runs += 1
 plot_hyperparams_and_error()
-plot_derivatives('training_1.csv', data1_x_dot, data1_x_dot_predicted)
+plot_derivatives(file1, data1_x_dot, data1_x_dot_predicted)
 
 data2_error, model2, data2_x_dot, data2_x_dot_predicted = get_error_model_and_derivatives(data2, degree_best,
                                                                                           lambda_best,
@@ -298,7 +300,7 @@ data2_error, model2, data2_x_dot, data2_x_dot_predicted = get_error_model_and_de
                                                                                           threshold_best,
                                                                                           save_metadata=False)
 
-plot_derivatives('training_2.csv', data2_x_dot, data2_x_dot_predicted)
+plot_derivatives(file2, data2_x_dot, data2_x_dot_predicted)
 print("plotted graphs after 2nd GPGO run")
 
 data3_error, model3, data3_x_dot, data3_x_dot_predicted = get_error_model_and_derivatives(data3, degree_best,
@@ -307,5 +309,5 @@ data3_error, model3, data3_x_dot, data3_x_dot_predicted = get_error_model_and_de
                                                                                           threshold_best)
 
 plot_hyperparams_and_error()
-plot_derivatives('validation_1.csv', data3_x_dot, data3_x_dot_predicted)
+plot_derivatives(file3, data3_x_dot, data3_x_dot_predicted)
 print()
