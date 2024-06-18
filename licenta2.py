@@ -86,7 +86,7 @@ def get_fitted_model(x, degree, lambda_val, n_frequencies, threshold):
     return model.fit(x, t=t)
 
 
-def plot_derivatives(file_name, actual_derivative, expected_derivative):
+def plot_derivatives(file_name, expected_derivative, actual_derivative):
     # plot the 2 derivatives, fully
     for derivative_type, derivative in {'actual': actual_derivative, 'expected': expected_derivative}.items():
         plt.figure()
