@@ -89,6 +89,8 @@ def get_fitted_model(x, degree, lambda_val, n_frequencies, threshold):
 
 
 def plot_derivatives(file_name, computed_derivative, predicted):
+    global plot_derivatives_runs
+    runs = plot_derivatives_runs
     # plot the 2 derivatives, fully
     for derivative_type, derivative in {'predicted': predicted, 'computed': computed_derivative}.items():
         plt.figure()
@@ -96,7 +98,7 @@ def plot_derivatives(file_name, computed_derivative, predicted):
         plt.xlabel('Time')
         plt.ylabel('Derivative')
         plt.title(f'{derivative_type} Derivative for {file_name}')
-        plt.savefig(f'out/derivative_{file_name}_full_{derivative_type}.png', bbox_inches='tight')
+        plt.savefig(f'out/derivative{runs}_{file_name}_full_{derivative_type}.png', bbox_inches='tight')
         plt.show() if SHOW_PLOTS else plt.close()
     # plot a plot for each set of channels from both derivatives
     for i, channel in enumerate(eeg_channels):
@@ -107,7 +109,7 @@ def plot_derivatives(file_name, computed_derivative, predicted):
         plt.ylabel('Amplitude')
         plt.title(f'predicted vs computed for data {file_name} for channel {channel}')
         plt.legend(loc='upper right')
-        plt.savefig(f'out/derivative_{file_name}_{channel}.png', bbox_inches='tight')
+        plt.savefig(f'out/derivative{runs}_{file_name}_{channel}.png', bbox_inches='tight')
         plt.show() if SHOW_PLOTS else plt.close()
 
 
@@ -191,6 +193,7 @@ def run_gpgo_and_get_results(data):
 
 
 plot_hyperparams_and_error_runs = 0
+plot_derivatives_runs = 0
 
 # Load data
 file_names = ['training_1.csv', 'training_2.csv', 'validation_1.csv']
@@ -258,9 +261,44 @@ data2_error, model2, data2_x_dot, data2_x_dot_predicted = get_error_and_derivati
                                                                                     lambda_best,
                                                                                     n_frequencies_best,
                                                                                     threshold_best)
-plot_derivatives('training_2.csv', data2_x_dot, data2_x_dot_predicted)
 plot_hyperparams_and_error()
+plot_derivatives('training_2.csv', data2_x_dot, data2_x_dot_predicted)
+print("plotted graphs after 1st GPGO run")
 
 best_params2 = run_gpgo_and_get_results(data2)
+
+best_error1 = best_params1[1]
+best_error2 = best_params2[1]
+best_error = None
+
+if best_error1 < best_error2:
+    best_params = best_params1
+    print("Best parameters are from the 1st run")
+else:
+    best_params = best_params2
+    print("Best parameters are from the 2nd run")
+
+degree_best = int(best_params[0]['degree'])
+n_frequencies_best = int(best_params[0]['n_frequencies'])
+lambda_best = best_params[0]['lambda_val']
+threshold_best = best_params[0]['threshold']
+
+data1_error, model1, data1_x_dot, data1_x_dot_predicted = get_error_model_and_derivatives(data1, degree_best,
+                                                                                          lambda_best,
+                                                                                          n_frequencies_best,
+                                                                                          threshold_best,
+                                                                                          save_metadata=False)
+plot_derivatives_runs += 1
+plot_hyperparams_and_error()
+plot_derivatives('training_1.csv', data1_x_dot, data1_x_dot_predicted)
+
+data2_error, model2, data2_x_dot, data2_x_dot_predicted = get_error_model_and_derivatives(data2, degree_best,
+                                                                                          lambda_best,
+                                                                                          n_frequencies_best,
+                                                                                          threshold_best,
+                                                                                          save_metadata=False)
+
+plot_derivatives('training_2.csv', data2_x_dot, data2_x_dot_predicted)
+print("plotted graphs after 2nd GPGO run")
 
 print()
