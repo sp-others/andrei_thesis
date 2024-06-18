@@ -23,7 +23,7 @@ file1 = 'training_1.csv'
 file2 = 'training_2.csv'
 DATA_WIDTH = 11  # number of columns used from the csv file
 
-ALPHA = 0
+ALPHA = 1
 
 int_bounds = ('int', [2, 10])
 threshold_bounds = ('cont', [0, 0.1])
