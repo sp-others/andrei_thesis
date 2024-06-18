@@ -55,25 +55,27 @@ def read_data(filename, last_column_number=None):
 # Define the objective function
 def get_objective_function(x):
     def objective(degree, n_frequencies, lambda_val, threshold):
-        return get_error_and_derivatives(x, degree, lambda_val, n_frequencies, threshold)[0]
+        return get_error_model_and_derivatives(x, degree, lambda_val, n_frequencies, threshold)[0]
 
     return objective
 
 
-def get_error_and_derivatives(x, degree, lambda_val, n_frequencies, threshold, save_metadata=True):
-    x_dot = np.gradient(x, axis=0)
+def get_error_model_and_derivatives(x, degree, lambda_val, n_frequencies, threshold, save_metadata=True):
     model = get_fitted_model(x, degree, lambda_val, n_frequencies, threshold)
+    return get_error_and_derivatives(model, x, degree, lambda_val, n_frequencies, threshold, save_metadata)
+
+
+def get_error_and_derivatives(model, x, degree, lambda_val, n_frequencies, threshold, save_metadata=True):
+    x_dot = np.gradient(x, axis=0)
     x_dot_predicted = model.predict(x)
     # TODO: check how error is computed (w/ or w/o minus OR as in licenta.py)
     error = -np.mean((x_dot - x_dot_predicted) ** 2) + ALPHA * model.complexity
-
     # Store hyperparameters and error for plotting
     if save_metadata:
         global hyperparameter_history, error_history
         hyperparameter_history.append((degree, n_frequencies, lambda_val, threshold))
         error_history.append(error)
-
-    return error, x_dot, x_dot_predicted
+    return error, model, x_dot, x_dot_predicted
 
 
 def get_fitted_model(x, degree, lambda_val, n_frequencies, threshold):
@@ -109,11 +111,11 @@ def plot_derivatives(file_name, actual_derivative, expected_derivative):
 
 def plot_hyperparams_and_error():
     global hyperparameter_history
-    hyperparameter_history = np.array(hyperparameter_history)
+    hyperparameter_history_as_np_array = np.array(hyperparameter_history)
     # Plot evolution of hyperparameters (degree & n_frequencies)
     plt.figure()
-    plt.plot(hyperparameter_history[:, 0], label='degree')
-    plt.plot(hyperparameter_history[:, 1], label='n_frequencies')
+    plt.plot(hyperparameter_history_as_np_array[:, 0], label='degree')
+    plt.plot(hyperparameter_history_as_np_array[:, 1], label='n_frequencies')
     plt.xlabel('Iteration')
     plt.ylabel('Hyperparameter Value')
     plt.legend()
@@ -122,7 +124,7 @@ def plot_hyperparams_and_error():
     plt.show()
     # Plot evolution of hyperparameters (lambda_val)
     plt.figure()
-    plt.plot(hyperparameter_history[:, 2], label='lambda_val')
+    plt.plot(hyperparameter_history_as_np_array[:, 2], label='lambda_val')
     plt.xlabel('Iteration')
     plt.ylabel('Hyperparameter Value')
     plt.legend()
@@ -131,7 +133,7 @@ def plot_hyperparams_and_error():
     plt.show()
     # Plot evolution of hyperparameters (threshold)
     plt.figure()
-    plt.plot(hyperparameter_history[:, 3], label='threshold')
+    plt.plot(hyperparameter_history_as_np_array[:, 3], label='threshold')
     plt.xlabel('Iteration')
     plt.ylabel('Hyperparameter Value')
     plt.legend()
@@ -213,9 +215,11 @@ n_frequencies_best = int(best_params[0]['n_frequencies'])
 lambda_best = best_params[0]['lambda_val']
 threshold_best = best_params[0]['threshold']
 
-data1_error, data1_x_dot, data1_x_dot_predicted = get_error_and_derivatives(data1, degree_best, lambda_best,
-                                                                            n_frequencies_best,
-                                                                            threshold_best, save_metadata=False)
+data1_error, model1, data1_x_dot, data1_x_dot_predicted = get_error_model_and_derivatives(data1, degree_best,
+                                                                                          lambda_best,
+                                                                                          n_frequencies_best,
+                                                                                          threshold_best,
+                                                                                          save_metadata=False)
 
 print("Best Model Predictions:")
 print(data1_x_dot_predicted)
@@ -225,6 +229,17 @@ print('to')
 print(end_time)
 print(f'Total time: {end - start} seconds')
 
+"""
+if 429 Too Many Requests is thrown by PyCharm when plotting the graphs, then 
+https://youtrack.jetbrains.com/issue/PY-43687/Problems-with-many-plots-in-scientific-view#focus=Comments-27-6266042.0-0
+"""
+
 plot_data()
 plot_hyperparams_and_error()
 plot_derivatives('training_1.csv', data1_x_dot, data1_x_dot_predicted)
+data2_error, model2, data2_x_dot, data2_x_dot_predicted = get_error_and_derivatives(model1, data2, degree_best,
+                                                                                    lambda_best,
+                                                                                    n_frequencies_best,
+                                                                                    threshold_best)
+plot_derivatives('training_2.csv', data2_x_dot, data2_x_dot_predicted)
+plot_hyperparams_and_error()

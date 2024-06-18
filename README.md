@@ -12,14 +12,14 @@ se cere:
 1. ~~grafic M_1~~
 2. ~~GRafic M_2~~
 3. ~~Grafic derivata Matricii M_1, reala.~~
-4. Grafic derivata Matricii M_2, reala.
+4. ~~Grafic derivata Matricii M_2, reala.~~
 5. ~~Grafic derivata aproximata a Matricii M_1.~~
-6. Grafic derivata aproximata a Matricii M_2.
+6. ~~Grafic derivata aproximata a Matricii M_2.~~
 7. ~~GRafic derivata aproximata vs derivata reala pentru 2 canale matricea 1.~~
-8. grafic derivata aproximata vs derivata reala pentru 2 canale matricea 2.
-9. Graficul erorii in timp, ordonata descrescator; Se iau erorile, se sorteaza descrescator, se afiseaza eroarea in functie de timp.
-10. Graficul evolutiei hiperparametrilor in timp pentru cei 2 hipr subunitari.
-11. Graficul pentru hiperparametrii > 1 pentru cei 2 hiperparametrii >1.
+8. ~~grafic derivata aproximata vs derivata reala pentru 2 canale matricea 2.~~
+9. ~~Graficul erorii in timp, ordonata descrescator; Se iau erorile, se sorteaza descrescator, se afiseaza eroarea in functie de timp.~~
+10. ~~Graficul evolutiei hiperparametrilor in timp pentru cei 2 hipr subunitari.~~
+11. ~~Graficul pentru hiperparametrii > 1 pentru cei 2 hiperparametrii >1.~~
 12. !!!! pentru antrenarea lui M_2, trebuie sa se foloseasca printre parametrii, solutia optimala de la antrenarea lui M_1, adica tuplul jipeparametrilor pentru care eroarea era minima.----> folosesti SINDY pe setul de param cei mai buni la 1, obtii o eroare.
 13. !!!!dupa antrenarea cu M_2, se inlocuieste tuplyl parametrilor cei mai buni, cu noua solutie, doar ca de data asta,
 in LISTA ERORILOR incluzi si eroarea obtinuta cu hiperparametrii de la 1.,  apoi sortezi iar descrescator erorile, incluzand si eroarea calculata de tine in manual.
