@@ -2,6 +2,7 @@ import datetime
 import os
 import time
 
+import matplotlib
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -30,7 +31,7 @@ alpha_bounds = ('cont', [0, 1e-12])
 GPGO_ITERATIONS = 20
 CPU_CORES_FOR_GPGO = int(os.getenv('CPU_CORES_FOR_GPGO', 4))
 
-SHOW_PLOTS = False
+SHOW_PLOTS = False  # whether to show the plots interactively or not (recommend to use False when displaying many plots)
 
 # Initialize history storage
 hyperparameter_history = []
@@ -255,6 +256,11 @@ https://youtrack.jetbrains.com/issue/PY-43687/Problems-with-many-plots-in-scient
 # make sure the out dir exists
 if not os.path.exists('out'):
     os.makedirs('out')
+
+# to avoid Tcl_AsyncDelete: async handler deleted by the wrong thread
+# (see more at https://github.com/matplotlib/matplotlib/issues/27713)
+if not SHOW_PLOTS:
+    matplotlib.use('Agg')
 
 plot_data()
 plot_hyperparams_and_error()
