@@ -204,16 +204,16 @@ end_time = datetime.datetime.now().isoformat()
 end = time.time()
 
 # Get the best parameters
-best_params = gpgo.getResult()
+best_params1 = gpgo.getResult()
 
 print("Best Parameters:")
-print(best_params)
+print(best_params1)
 
 # Refine the model with the best parameters
-degree_best = int(best_params[0]['degree'])
-n_frequencies_best = int(best_params[0]['n_frequencies'])
-lambda_best = best_params[0]['lambda_val']
-threshold_best = best_params[0]['threshold']
+degree_best = int(best_params1[0]['degree'])
+n_frequencies_best = int(best_params1[0]['n_frequencies'])
+lambda_best = best_params1[0]['lambda_val']
+threshold_best = best_params1[0]['threshold']
 
 data1_error, model1, data1_x_dot, data1_x_dot_predicted = get_error_model_and_derivatives(data1, degree_best,
                                                                                           lambda_best,
