@@ -69,13 +69,12 @@ def objective(degree, n_frequencies, lambda_val, threshold):
 
 # Load data
 data1 = read_data(file1, DATA_WIDTH)
-data = data1
 
 # Assuming time vector t and derivative x_dot are known
 # For the sake of this example, let's create synthetic ones
-t = np.linspace(1, len(data), len(data), dtype=int)
-x = data
-x_dot = np.gradient(data, axis=0)  # Replace this with actual derivative if available
+t = np.linspace(1, len(data1), len(data1), dtype=int)
+x = data1
+x_dot = np.gradient(data1, axis=0)  # Replace this with actual derivative if available
 
 # Define the parameter space
 # TODO: find the type for lambda_val & threshold
@@ -189,8 +188,8 @@ plt.show()
 # Plot EEG data
 plt.figure(figsize=(12, len(eeg_channels)))
 t_columns = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
-for i, eeg_data in enumerate(data):
-    plt.plot(t_columns, data[i], label=f'{i + 1:00}: {eeg_channels[i]}')
+for i, eeg_data in enumerate(data1):
+    plt.plot(t_columns, data1[i], label=f'{i + 1:00}: {eeg_channels[i]}')
 
 plt.xlabel('Time (s)')
 plt.ylabel('Amplitude')
