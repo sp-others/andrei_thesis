@@ -9,8 +9,8 @@ In acest document. M_2 se refeta la a doua matrice de trainning din data_set, de
 prin derivata matricii M_n, ma refer la derivata numerica, reala, a celor 10 channeluri din matrice.
 se cere:
 
-1. grafic M_1
-2. GRafic M_2
+1. ~~grafic M_1~~
+2. ~~GRafic M_2~~
 3. Grafic derivata Matricii M_1, reala.
 4. Grafic derivata Matricii M_2, reala.
 5. Grafic derivata aproximata a Matricii M_1.
@@ -26,7 +26,7 @@ in LISTA ERORILOR incluzi si eroarea obtinuta cu hiperparametrii de la 1.,  apoi
 
     iei tuplul de parametrii care au eroarea cea mai mica;
 14. Se face validation, se aproximeaza aceeasi dimensiunea din M_3, matricea validation, folosind DOAR hiperparametrii gasiti anterior.
-15. Se face graficul lui M_3.
+15. ~~Se face graficul lui M_3.~~
 16. GRaficul lui M_3 derivat.
 17. Graficele de eroare, dintre M_3 derivat aproximat si real.
 18. Graficele cu 2 channele apxoimate si derivate din M_3.

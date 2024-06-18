@@ -68,7 +68,11 @@ def objective(degree, n_frequencies, lambda_val, threshold):
 
 
 # Load data
-data1 = read_data(file1, DATA_WIDTH)
+file_names = ['training_1.csv', 'training_2.csv', 'validation_1.csv']
+data_dict = {file_name: read_data(file_name, DATA_WIDTH) for file_name in file_names}
+data1 = data_dict['training_1.csv']
+data2 = data_dict['training_2.csv']
+data3 = data_dict['validation_1.csv']
 
 # Assuming time vector t and derivative x_dot are known
 # For the sake of this example, let's create synthetic ones
@@ -186,14 +190,15 @@ plt.title('Evolution of Error')
 plt.show()
 
 # Plot EEG data
-plt.figure(figsize=(12, len(eeg_channels)))
-t_columns = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
-for i, eeg_data in enumerate(data1):
-    plt.plot(t_columns, data1[i], label=f'{i + 1:00}: {eeg_channels[i]}')
+for name, data in data_dict.items():
+    plt.figure(figsize=(12, len(eeg_channels)))
+    t_columns = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
+    for j, eeg_data in enumerate(data):
+        plt.plot(t_columns, data[j], label=f'{j + 1:00}: {eeg_channels[j]}')
 
-plt.xlabel('Time (s)')
-plt.ylabel('Amplitude')
-plt.title('EEG Data from CSV')
-plt.legend(loc='upper right')
-plt.savefig('out/data.png', bbox_inches='tight')
-plt.show()
+    plt.xlabel('Time (s)')
+    plt.ylabel('Amplitude')
+    plt.title(f'EEG Data from {name}')
+    plt.legend(loc='upper right')
+    plt.savefig(f'out/data_{name}.png', bbox_inches='tight')
+    plt.show()
