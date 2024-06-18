@@ -164,6 +164,26 @@ def plot_data():
         plt.show()
 
 
+def run_gpgo_and_get_results(data):
+    gpgo = GPGO(surogate, acq, get_objective_function(data), param_bounds, n_jobs=CPU_CORES_FOR_GPGO)
+
+    # Run Bayesian Optimization
+    start_time = datetime.datetime.now().isoformat()
+    start = time.time()
+    print(start_time)
+    gpgo.run(max_iter=GPGO_ITERATIONS)
+    end_time = datetime.datetime.now().isoformat()
+    end = time.time()
+
+    print(f'GPGO with {GPGO_ITERATIONS} iterations ran from')
+    print(start_time)
+    print('to')
+    print(end_time)
+    print(f'Total time: {end - start} seconds')
+
+    return gpgo.getResult()
+
+
 # Load data
 file_names = ['training_1.csv', 'training_2.csv', 'validation_1.csv']
 data_dict = {file_name: read_data(file_name, DATA_WIDTH) for file_name in file_names}
@@ -192,19 +212,9 @@ cov = squaredExponential()
 surogate = GaussianProcess(cov)
 acq = Acquisition(mode='ExpectedImprovement')
 
+# Run gpgo and get the best parameters
 print(f'Using {CPU_CORES_FOR_GPGO} CPU cores for GPGO')
-gpgo = GPGO(surogate, acq, get_objective_function(data1), param_bounds, n_jobs=CPU_CORES_FOR_GPGO)
-
-# Run Bayesian Optimization
-start_time = datetime.datetime.now().isoformat()
-start = time.time()
-print(start_time)
-gpgo.run(max_iter=GPGO_ITERATIONS)
-end_time = datetime.datetime.now().isoformat()
-end = time.time()
-
-# Get the best parameters
-best_params1 = gpgo.getResult()
+best_params1 = run_gpgo_and_get_results(data1)
 
 print("Best Parameters:")
 print(best_params1)
@@ -223,11 +233,6 @@ data1_error, model1, data1_x_dot, data1_x_dot_predicted = get_error_model_and_de
 
 print("Best Model Predictions:")
 print(data1_x_dot_predicted)
-print(f'GPGO with {GPGO_ITERATIONS} iterations ran from')
-print(start_time)
-print('to')
-print(end_time)
-print(f'Total time: {end - start} seconds')
 
 """
 if 429 Too Many Requests is thrown by PyCharm when plotting the graphs, then 
