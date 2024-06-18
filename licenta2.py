@@ -32,6 +32,8 @@ alpha_bounds = ('cont', [0, 1e-12])
 GPGO_ITERATIONS = 20
 CPU_CORES_FOR_GPGO = int(os.getenv('CPU_CORES_FOR_GPGO', 4))
 
+SHOW_PLOTS = False
+
 # Initialize history storage
 hyperparameter_history = []
 error_history = []
@@ -95,7 +97,7 @@ def plot_derivatives(file_name, expected_derivative, actual_derivative):
         plt.ylabel('Derivative')
         plt.title(f'{derivative_type} Derivative for {file_name}')
         plt.savefig(f'out/derivative_{file_name}_full_{derivative_type}.png', bbox_inches='tight')
-        plt.show()
+        plt.show() if SHOW_PLOTS else plt.close()
     # plot a plot for each set of channels from both derivatives
     for i, channel in enumerate(eeg_channels):
         plt.figure(figsize=(12, len(eeg_channels)))
@@ -106,7 +108,7 @@ def plot_derivatives(file_name, expected_derivative, actual_derivative):
         plt.title(f'actual vs expected for data {file_name} for channel {channel}')
         plt.legend(loc='upper right')
         plt.savefig(f'out/derivative_{file_name}_{channel}.png', bbox_inches='tight')
-        plt.show()
+        plt.show() if SHOW_PLOTS else plt.close()
 
 
 def plot_hyperparams_and_error():
@@ -124,7 +126,7 @@ def plot_hyperparams_and_error():
     plt.legend()
     plt.title('Evolution of Hyperparameters (degree & n_frequencies)')
     plt.savefig(f'{savefig_prefix}_degree_and_n_frequencies.png', bbox_inches='tight')
-    plt.show()
+    plt.show() if SHOW_PLOTS else plt.close()
     # Plot evolution of hyperparameters (lambda_val)
     plt.figure()
     plt.plot(hyperparameter_history_as_np_array[:, 2], label='lambda_val')
@@ -133,7 +135,7 @@ def plot_hyperparams_and_error():
     plt.legend()
     plt.title('Evolution of Hyperparameters (lambda_val)')
     plt.savefig(f'{savefig_prefix}_lambda_val.png', bbox_inches='tight')
-    plt.show()
+    plt.show() if SHOW_PLOTS else plt.close()
     # Plot evolution of hyperparameters (threshold)
     plt.figure()
     plt.plot(hyperparameter_history_as_np_array[:, 3], label='threshold')
@@ -142,7 +144,7 @@ def plot_hyperparams_and_error():
     plt.legend()
     plt.title('Evolution of Hyperparameters (threshold)')
     plt.savefig(f'{savefig_prefix}_threshold.png', bbox_inches='tight')
-    plt.show()
+    plt.show() if SHOW_PLOTS else plt.close()
     # Plot evolution of error
     plt.figure()
     plt.plot(sorted(error_history, reverse=True), label='Error')
@@ -151,7 +153,7 @@ def plot_hyperparams_and_error():
     plt.legend()
     plt.title('Evolution of Error')
     plt.savefig(f'out/error{plot_hyperparams_and_error_runs}_threshold.png', bbox_inches='tight')
-    plt.show()
+    plt.show() if SHOW_PLOTS else plt.close()
 
 
 def plot_data():
@@ -165,7 +167,7 @@ def plot_data():
         plt.title(f'EEG Data from {name}')
         plt.legend(loc='upper right')
         plt.savefig(f'out/data_{name}.png', bbox_inches='tight')
-        plt.show()
+        plt.show() if SHOW_PLOTS else plt.close()
 
 
 def run_gpgo_and_get_results(data):
