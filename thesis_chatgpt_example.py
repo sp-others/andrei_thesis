@@ -197,19 +197,3 @@ plt.title('EEG Data from CSV')
 plt.legend(loc='upper right')
 plt.savefig('out/data.png', bbox_inches='tight')
 plt.show()
-
-# Plot the data from the CSV file w/ bigger width
-data_big = read_data(file1, 400)
-
-width = len(data_big[0])
-t = np.linspace(1, width, width, dtype=int)
-plt.figure(figsize=(12, len(eeg_channels)))
-for i, eeg_data in enumerate(data_big):
-    plt.plot(t, data_big[i], label=f'{i + 1:00}: {eeg_channels[i]}')
-
-plt.xlabel('Time (s)')
-plt.ylabel('Amplitude')
-plt.title('EEG Data from CSV')
-plt.legend(loc='upper right')
-plt.savefig('out/data_big.png', bbox_inches='tight')
-plt.show()
