@@ -32,7 +32,6 @@ alpha_bounds = ('cont', [0, 1e-12])
 GPGO_ITERATIONS = 20
 CPU_CORES_FOR_GPGO = int(os.getenv('CPU_CORES_FOR_GPGO', 4))
 
-
 # Initialize history storage
 hyperparameter_history = []
 error_history = []
@@ -92,6 +91,61 @@ def plot_derivatives(file_name, actual_derivative, expected_derivative):
         plt.title(f'actual vs expected for data {file_name} for channel {channel}')
         plt.legend(loc='upper right')
         plt.savefig(f'out/derivative_{file_name}_{channel}.png', bbox_inches='tight')
+        plt.show()
+
+
+def plot_hyperparams_and_error():
+    global hyperparameter_history
+    hyperparameter_history = np.array(hyperparameter_history)
+    # Plot evolution of hyperparameters (degree & n_frequencies)
+    plt.figure()
+    plt.plot(hyperparameter_history[:, 0], label='degree')
+    plt.plot(hyperparameter_history[:, 1], label='n_frequencies')
+    plt.xlabel('Iteration')
+    plt.ylabel('Hyperparameter Value')
+    plt.legend()
+    plt.title('Evolution of Hyperparameters (degree & n_frequencies)')
+    plt.savefig('out/hyperparams_degree_and_n_frequencies.png', bbox_inches='tight')
+    plt.show()
+    # Plot evolution of hyperparameters (lambda_val)
+    plt.figure()
+    plt.plot(hyperparameter_history[:, 2], label='lambda_val')
+    plt.xlabel('Iteration')
+    plt.ylabel('Hyperparameter Value')
+    plt.legend()
+    plt.title('Evolution of Hyperparameters (lambda_val)')
+    plt.savefig('out/hyperparams_lambda_val.png', bbox_inches='tight')
+    plt.show()
+    # Plot evolution of hyperparameters (threshold)
+    plt.figure()
+    plt.plot(hyperparameter_history[:, 3], label='threshold')
+    plt.xlabel('Iteration')
+    plt.ylabel('Hyperparameter Value')
+    plt.legend()
+    plt.title('Evolution of Hyperparameters (threshold)')
+    plt.savefig('out/hyperparams_threshold.png', bbox_inches='tight')
+    plt.show()
+    # Plot evolution of error
+    plt.figure()
+    plt.plot(sorted(error_history, reverse=True), label='Error')
+    plt.xlabel('Iteration')
+    plt.ylabel('Error')
+    plt.legend()
+    plt.title('Evolution of Error')
+    plt.show()
+
+
+def plot_data():
+    for name, data in data_dict.items():
+        plt.figure(figsize=(12, len(eeg_channels)))
+        for j, eeg_data in enumerate(data):
+            plt.plot(t_columns, data[j], label=f'{j + 1:00}: {eeg_channels[j]}')
+
+        plt.xlabel('Time (s)')
+        plt.ylabel('Amplitude')
+        plt.title(f'EEG Data from {name}')
+        plt.legend(loc='upper right')
+        plt.savefig(f'out/data_{name}.png', bbox_inches='tight')
         plt.show()
 
 
@@ -162,60 +216,6 @@ print('to')
 print(end_time)
 print(f'Total time: {end - start} seconds')
 
-
-# Plot derivatives for data1
 plot_derivatives('training_1.csv', x_dot, x_dot_predicted_best)
-
-hyperparameter_history = np.array(hyperparameter_history)
-# Plot evolution of hyperparameters (degree & n_frequencies)
-plt.figure()
-plt.plot(hyperparameter_history[:, 0], label='degree')
-plt.plot(hyperparameter_history[:, 1], label='n_frequencies')
-plt.xlabel('Iteration')
-plt.ylabel('Hyperparameter Value')
-plt.legend()
-plt.title('Evolution of Hyperparameters (degree & n_frequencies)')
-plt.savefig('out/hyperparams_degree_and_n_frequencies.png', bbox_inches='tight')
-plt.show()
-
-# Plot evolution of hyperparameters (lambda_val)
-plt.figure()
-plt.plot(hyperparameter_history[:, 2], label='lambda_val')
-plt.xlabel('Iteration')
-plt.ylabel('Hyperparameter Value')
-plt.legend()
-plt.title('Evolution of Hyperparameters (lambda_val)')
-plt.savefig('out/hyperparams_lambda_val.png', bbox_inches='tight')
-plt.show()
-
-# Plot evolution of hyperparameters (threshold)
-plt.figure()
-plt.plot(hyperparameter_history[:, 3], label='threshold')
-plt.xlabel('Iteration')
-plt.ylabel('Hyperparameter Value')
-plt.legend()
-plt.title('Evolution of Hyperparameters (threshold)')
-plt.savefig('out/hyperparams_threshold.png', bbox_inches='tight')
-plt.show()
-
-# Plot evolution of error
-plt.figure()
-plt.plot(sorted(error_history, reverse=True), label='Error')
-plt.xlabel('Iteration')
-plt.ylabel('Error')
-plt.legend()
-plt.title('Evolution of Error')
-plt.show()
-
-# Plot EEG data
-for name, data in data_dict.items():
-    plt.figure(figsize=(12, len(eeg_channels)))
-    for j, eeg_data in enumerate(data):
-        plt.plot(t_columns, data[j], label=f'{j + 1:00}: {eeg_channels[j]}')
-
-    plt.xlabel('Time (s)')
-    plt.ylabel('Amplitude')
-    plt.title(f'EEG Data from {name}')
-    plt.legend(loc='upper right')
-    plt.savefig(f'out/data_{name}.png', bbox_inches='tight')
-    plt.show()
+plot_hyperparams_and_error()
+plot_data()
