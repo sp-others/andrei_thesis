@@ -186,6 +186,7 @@ plt.legend()
 plt.title('Evolution of Error')
 plt.show()
 
+# Plot EEG data
 plt.figure(figsize=(12, len(eeg_channels)))
 t_columns = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
 for i, eeg_data in enumerate(data):
