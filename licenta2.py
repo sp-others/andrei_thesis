@@ -77,6 +77,7 @@ data3 = data_dict['validation_1.csv']
 # Assuming time vector t and derivative x_dot are known
 # For the sake of this example, let's create synthetic ones
 t = np.linspace(1, len(data1), len(data1), dtype=int)
+t_columns = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
 x = data1
 x_dot = np.gradient(data1, axis=0)  # Replace this with actual derivative if available
 
@@ -137,16 +138,32 @@ print('to')
 print(end_time)
 print(f'Total time: {end - start} seconds')
 
-# Plot actual vs expected derivatives
-plt.figure()
-plt.plot(t, x_dot, label='Actual Derivative')
-plt.plot(t, x_dot_predicted_best, label='Predicted Derivative')
-plt.xlabel('Time')
-plt.ylabel('Derivative')
-plt.legend()
-plt.savefig('out/derivative-comparison.png', bbox_inches='tight')
-plt.title('Actual vs. Predicted Derivative')
-plt.show()
+
+def plot_derivatives(name, actual_derivative, expected_derivative):
+    # plot the 2 derivatives, fully
+    for derivative_type, derivative in {'actual': actual_derivative, 'expected': expected_derivative}.items():
+        plt.figure()
+        plt.plot(t, derivative)
+        plt.xlabel('Time')
+        plt.ylabel('Derivative')
+        plt.title(f'{derivative_type} Derivative for {name}')
+        plt.savefig(f'out/derivative_{name}_{derivative_type}.png', bbox_inches='tight')
+        plt.show()
+    # plot a plot for each set of channels from both derivatives
+    for i, channel in enumerate(eeg_channels):
+        plt.figure(figsize=(12, len(eeg_channels)))
+        plt.plot(t_columns, actual_derivative[i], label=f'{channel} actual derivative')
+        plt.plot(t_columns, expected_derivative[i], label=f'{channel} expected derivative')
+        plt.xlabel('Time (s)')
+        plt.ylabel('Amplitude')
+        plt.title(f'actual vs expected for data {name} for channel {channel}')
+        plt.legend(loc='upper right')
+        plt.savefig(f'out/derivative_{name}_{channel}.png', bbox_inches='tight')
+        plt.show()
+
+
+# Plot derivatives for data1
+plot_derivatives('training_1.csv', x_dot, x_dot_predicted_best)
 
 hyperparameter_history = np.array(hyperparameter_history)
 # Plot evolution of hyperparameters (degree & n_frequencies)
@@ -192,7 +209,6 @@ plt.show()
 # Plot EEG data
 for name, data in data_dict.items():
     plt.figure(figsize=(12, len(eeg_channels)))
-    t_columns = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
     for j, eeg_data in enumerate(data):
         plt.plot(t_columns, data[j], label=f'{j + 1:00}: {eeg_channels[j]}')
 

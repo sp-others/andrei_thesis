@@ -11,11 +11,11 @@ se cere:
 
 1. ~~grafic M_1~~
 2. ~~GRafic M_2~~
-3. Grafic derivata Matricii M_1, reala.
+3. ~~Grafic derivata Matricii M_1, reala.~~
 4. Grafic derivata Matricii M_2, reala.
-5. Grafic derivata aproximata a Matricii M_1.
+5. ~~Grafic derivata aproximata a Matricii M_1.~~
 6. Grafic derivata aproximata a Matricii M_2.
-7. GRafic derivata aproximata vs derivata reala pentru 2 canale matricea 1.
+7. ~~GRafic derivata aproximata vs derivata reala pentru 2 canale matricea 1.~~
 8. grafic derivata aproximata vs derivata reala pentru 2 canale matricea 2.
 9. Graficul erorii in timp, ordonata descrescator; Se iau erorile, se sorteaza descrescator, se afiseaza eroarea in functie de timp.
 10. Graficul evolutiei hiperparametrilor in timp pentru cei 2 hipr subunitari.
