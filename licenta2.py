@@ -33,6 +33,11 @@ GPGO_ITERATIONS = 20
 CPU_CORES_FOR_GPGO = int(os.getenv('CPU_CORES_FOR_GPGO', 4))
 
 
+# Initialize history storage
+hyperparameter_history = []
+error_history = []
+
+
 # Function to read the data
 def read_data(filename, last_column_number=None):
     """
@@ -112,10 +117,6 @@ param_bounds = {
     'lambda_val': threshold_bounds,
     'threshold': alpha_bounds
 }
-
-# Initialize history storage
-hyperparameter_history = []
-error_history = []
 
 # Set up Bayesian Optimization
 cov = squaredExponential()
@@ -199,7 +200,7 @@ plt.show()
 
 # Plot evolution of error
 plt.figure()
-plt.plot(error_history, label='Error')
+plt.plot(sorted(error_history, reverse=True), label='Error')
 plt.xlabel('Iteration')
 plt.ylabel('Error')
 plt.legend()
