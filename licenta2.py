@@ -53,22 +53,34 @@ def read_data(filename, last_column_number=None):
 
 
 # Define the objective function
-def objective(degree, n_frequencies, lambda_val, threshold):
-    poly_library = PolynomialLibrary(degree=int(degree), include_bias=True)
-    fourier_library = FourierLibrary(n_frequencies=int(n_frequencies))
-    feature_library = poly_library + fourier_library
+def get_objective_function(x):
+    def objective(degree, n_frequencies, lambda_val, threshold):
+        return get_error_and_derivatives(x, degree, lambda_val, n_frequencies, threshold)[0]
 
-    model = SINDy(feature_library=feature_library, optimizer=STLSQ(threshold=threshold, alpha=lambda_val))
+    return objective
 
-    x_dot_predicted = model.fit(x, t=t).predict(x)
-    error = np.mean((x_dot - x_dot_predicted) ** 2) + ALPHA * model.complexity
+
+def get_error_and_derivatives(x, degree, lambda_val, n_frequencies, threshold):
+    x_dot = np.gradient(x, axis=0)
+    model = get_fitted_model(x, degree, lambda_val, n_frequencies, threshold)
+    x_dot_predicted = model.predict(x)
+    # TODO: check how error is computed (w/ or w/o minus OR as in licenta.py)
+    error = -np.mean((x_dot - x_dot_predicted) ** 2) + ALPHA * model.complexity
 
     # Store hyperparameters and error for plotting
     global hyperparameter_history, error_history
     hyperparameter_history.append((degree, n_frequencies, lambda_val, threshold))
     error_history.append(error)
 
-    return -error
+    return error, x_dot, x_dot_predicted
+
+
+def get_fitted_model(x, degree, lambda_val, n_frequencies, threshold):
+    poly_library = PolynomialLibrary(degree=int(degree), include_bias=True)
+    fourier_library = FourierLibrary(n_frequencies=int(n_frequencies))
+    feature_library = poly_library + fourier_library
+    model = SINDy(feature_library=feature_library, optimizer=STLSQ(threshold=threshold, alpha=lambda_val))
+    return model.fit(x, t=t)
 
 
 def plot_derivatives(file_name, actual_derivative, expected_derivative):
@@ -160,8 +172,8 @@ data3 = data_dict['validation_1.csv']
 # For the sake of this example, let's create synthetic ones
 t = np.linspace(1, len(data1), len(data1), dtype=int)
 t_columns = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
-x = data1
-x_dot = np.gradient(data1, axis=0)  # Replace this with actual derivative if available
+# x = data1
+# x_dot = np.gradient(data1, axis=0)  # Replace this with actual derivative if available
 
 # Define the parameter space
 # TODO: find the type for lambda_val & threshold
@@ -178,7 +190,7 @@ surogate = GaussianProcess(cov)
 acq = Acquisition(mode='ExpectedImprovement')
 
 print(f'Using {CPU_CORES_FOR_GPGO} CPU cores for GPGO')
-gpgo = GPGO(surogate, acq, objective, param_bounds, n_jobs=CPU_CORES_FOR_GPGO)
+gpgo = GPGO(surogate, acq, get_objective_function(data1), param_bounds, n_jobs=CPU_CORES_FOR_GPGO)
 
 # Run Bayesian Optimization
 start_time = datetime.datetime.now().isoformat()
@@ -200,16 +212,12 @@ n_frequencies_best = int(best_params[0]['n_frequencies'])
 lambda_best = best_params[0]['lambda_val']
 threshold_best = best_params[0]['threshold']
 
-poly_library_best = PolynomialLibrary(degree=degree_best, include_bias=True)
-fourier_library_best = FourierLibrary(n_frequencies=n_frequencies_best)
-feature_library_best = poly_library_best + fourier_library_best
-
-best_model = SINDy(feature_library=feature_library_best, optimizer=STLSQ(threshold=threshold_best, alpha=lambda_best))
-best_model.fit(x, t=t)
-x_dot_predicted_best = best_model.predict(x)
+data1_error, data1_x_dot, data1_x_dot_predicted = get_error_and_derivatives(data1, degree_best, lambda_best,
+                                                                            n_frequencies_best,
+                                                                            threshold_best)
 
 print("Best Model Predictions:")
-print(x_dot_predicted_best)
+print(data1_x_dot_predicted)
 print(f'GPGO with {GPGO_ITERATIONS} iterations ran from')
 print(start_time)
 print('to')
@@ -218,4 +226,4 @@ print(f'Total time: {end - start} seconds')
 
 plot_data()
 plot_hyperparams_and_error()
-plot_derivatives('training_1.csv', x_dot, x_dot_predicted_best)
+plot_derivatives('training_1.csv', data1_x_dot, data1_x_dot_predicted)
