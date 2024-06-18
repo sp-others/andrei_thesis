@@ -3,10 +3,10 @@ https://github.com/AndreiRaceanu/Bachelor-Thesis
 
 # TODO: 2024 06 18 18:40
 
-Observatie : 
-In acest document, M_1 se refera la prima matrice de training din data_set, de 10 * nr de coloane computational fezabile
-In acest document. M_2 se refeta la a doua matrice de trainning din data_set, de 10 * nr de coloane computational fezabile
-prin derivata matricii M_n, ma refer la derivata numerica, reala, a celor 10 channeluri din matrice.
+Observatie :  
+In acest document, M_1 se refera la prima matrice de training din data_set, de 10 * nr de coloane computational fezabile  
+In acest document. M_2 se refeta la a doua matrice de trainning din data_set, de 10 * nr de coloane computational fezabile  
+prin derivata matricii M_n, ma refer la derivata numerica, reala, a celor 10 channeluri din matrice.  
 se cere:
 
 1. ~~grafic M_1~~
