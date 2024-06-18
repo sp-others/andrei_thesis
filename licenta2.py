@@ -301,4 +301,11 @@ data2_error, model2, data2_x_dot, data2_x_dot_predicted = get_error_model_and_de
 plot_derivatives('training_2.csv', data2_x_dot, data2_x_dot_predicted)
 print("plotted graphs after 2nd GPGO run")
 
+data3_error, model3, data3_x_dot, data3_x_dot_predicted = get_error_model_and_derivatives(data3, degree_best,
+                                                                                          lambda_best,
+                                                                                          n_frequencies_best,
+                                                                                          threshold_best)
+
+plot_hyperparams_and_error()
+plot_derivatives('validation_1.csv', data3_x_dot, data3_x_dot_predicted)
 print()

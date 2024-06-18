@@ -25,11 +25,11 @@ se cere:
 in LISTA ERORILOR incluzi si eroarea obtinuta cu hiperparametrii de la 1.,  apoi sortezi iar descrescator erorile, incluzand si eroarea calculata de tine in manual.~~
 
     ~~iei tuplul de parametrii care au eroarea cea mai mica;~~
-14. Se face validation, se aproximeaza aceeasi dimensiunea din M_3, matricea validation, folosind DOAR hiperparametrii gasiti anterior.
+14. ~~Se face validation, se aproximeaza aceeasi dimensiunea din M_3, matricea validation, folosind DOAR hiperparametrii gasiti anterior.~~
 15. ~~Se face graficul lui M_3.~~
-16. GRaficul lui M_3 derivat.
-17. Graficele de eroare, dintre M_3 derivat aproximat si real.
-18. Graficele cu 2 channele apxoimate si derivate din M_3.
+16. ~~GRaficul lui M_3 derivat.~~
+17. ~~Graficele de eroare, dintre M_3 derivat aproximat si real.~~
+18. ~~Graficele cu 2 channele apxoimate si derivate din M_3.~~
 
 
 
