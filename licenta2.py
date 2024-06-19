@@ -69,8 +69,11 @@ def get_error_model_and_derivatives(x, degree, lambda_val, n_frequencies, thresh
 def get_error_and_derivatives(model, x, degree, lambda_val, n_frequencies, threshold, save_metadata=True):
     x_dot_predicted = model.predict(x)
     x_dot = model.differentiate(x, t=1)
-    # TODO: check how error is computed (w/ or w/o minus OR as in licenta.py)
-    error = -np.mean((x_dot - x_dot_predicted) ** 2) + ALPHA * model.complexity
+    # model.print()
+    error = -(model.score(x, metric=mean_squared_error) + ALPHA * model.complexity)
+    if all(equation == '0.000' for equation in model.equations()):
+        error = - 10 ** 5
+
     # Store hyperparameters and error for plotting
     if save_metadata:
         global hyperparameter_history, error_history
