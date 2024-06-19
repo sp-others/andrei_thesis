@@ -20,7 +20,7 @@ F5|FC1|P5|CP1|P4|PO8|FP2|FC6|FZ|PZ
 
 eeg_channels = ["CH_F5", "CH_FC1", "CH_P5", "CH_CP1", "CH_P4", "CH_PO8", "CH_FP2", "CH_FC6", "CH_FZ", "CH_PZ"]
 
-DATA_WIDTH = 11  # number of columns used from the csv file
+DATA_WIDTH = 5  # number of columns used from the csv file
 
 ALPHA = 1
 
@@ -67,8 +67,8 @@ def get_error_model_and_derivatives(x, degree, lambda_val, n_frequencies, thresh
 
 
 def get_error_and_derivatives(model, x, degree, lambda_val, n_frequencies, threshold, save_metadata=True):
-    x_dot = np.gradient(x, axis=0)
     x_dot_predicted = model.predict(x)
+    x_dot = model.differentiate(x, t=1)
     # TODO: check how error is computed (w/ or w/o minus OR as in licenta.py)
     error = -np.mean((x_dot - x_dot_predicted) ** 2) + ALPHA * model.complexity
     # Store hyperparameters and error for plotting
@@ -102,8 +102,8 @@ def plot_derivatives(file_name, computed_derivative, predicted):
     # plot a plot for each set of channels from both derivatives
     for i, channel in enumerate(eeg_channels):
         plt.figure(figsize=(12, len(eeg_channels)))
-        plt.plot(t_columns, predicted[i], label=f'{channel} predicted derivative')
-        plt.plot(t_columns, computed_derivative[i], label=f'{channel} computed derivative')
+        plt.plot(t_columns, computed_derivative[i], 'k', label=f'{channel} computed derivative')
+        plt.plot(t_columns, predicted[i], 'r--', label=f'{channel} predicted derivative')
         plt.xlabel('Time (s)')
         plt.ylabel('Amplitude')
         plt.title(f'predicted vs computed for data {file_name} for channel {channel}')
