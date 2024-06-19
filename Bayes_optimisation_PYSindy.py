@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import matplotlib.pyplot as plst
 from mpl_toolkits import mplot3d
@@ -18,6 +20,7 @@ from pysindy.differentiation import SmoothedFiniteDifference
 data_sine = np.sin(np.linspace(-np.pi/2, np.pi/2, num=1000))
 
 alpha = 1
+CPU_CORES_FOR_GPGO = int(os.getenv('CPU_CORES_FOR_GPGO', 4))
 
 score_err = []
 score_model = []
@@ -75,7 +78,7 @@ acq = Acquisition(mode = 'ExpectedImprovement')
 params = {'param1' : ('int',[2,100]),
           'param2' : ('int',[2,100])}
 np.random.seed(23)
-gpgo = GPGO(surogate, acq, err,params)
+gpgo = GPGO(surogate, acq, err,params, n_jobs=CPU_CORES_FOR_GPGO)
 gpgo.run(max_iter = 100,init_evals=20)
 
 
