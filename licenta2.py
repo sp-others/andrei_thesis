@@ -87,11 +87,11 @@ def get_fitted_model(x, degree, lambda_val, n_frequencies, threshold):
     return model.fit(x, t=t)
 
 
-def plot_derivatives(file_name, computed_derivative, predicted):
+def plot_derivatives(file_name, computed_derivative, predicted_derivative):
     global plot_derivatives_runs
     runs = plot_derivatives_runs
     # plot the 2 derivatives, fully
-    for derivative_type, derivative in {'predicted': predicted, 'computed': computed_derivative}.items():
+    for derivative_type, derivative in {'predicted': predicted_derivative, 'computed': computed_derivative}.items():
         plt.figure()
         plt.plot(t, derivative)
         plt.xlabel('Time')
@@ -103,7 +103,7 @@ def plot_derivatives(file_name, computed_derivative, predicted):
     for i, channel in enumerate(eeg_channels):
         plt.figure(figsize=(12, len(eeg_channels)))
         plt.plot(t_columns, computed_derivative[i], 'k', label=f'{channel} computed derivative')
-        plt.plot(t_columns, predicted[i], 'r--', label=f'{channel} predicted derivative')
+        plt.plot(t_columns, predicted_derivative[i], 'r--', label=f'{channel} predicted derivative')
         plt.xlabel('Time (s)')
         plt.ylabel('Amplitude')
         plt.title(f'predicted vs computed for data {file_name} for channel {channel}')
