@@ -63,7 +63,7 @@ def read_channel_indices(file_path, channel_list):
 # Function to read the data
 def read_data(filename, last_column_number=None, use_rows: List[int] = None):
     """
-    Read data from a CSV file
+    Read data from a CSV file, transposed
     :param filename: the csv file that contains the data
     :param last_column_number: if None, all columns are used, else only the first last_column_number columns are used
     :param use_rows: the rows to use from the csv file (0-indexed)
@@ -259,7 +259,8 @@ for emotion_i, emotion in enumerate(EMOTIONS):
     data_files = os.listdir(emotion)
 
     if nr_samples > len(data_files):
-        print(f'Not enough data files for emotion {emotion}. Skipping...')
+        print(f'Not enough data files for emotion {emotion}. Requested {nr_samples}, available {len(data_files)}. '
+              f'Skipping...')
         continue
 
     chosen_samples: List[str] = random.sample(data_files, nr_samples)
@@ -280,6 +281,9 @@ for emotion_i, emotion in enumerate(EMOTIONS):
     print(*best_results_sorted, sep='\n')
     best_result = best_results_sorted[0]
     print('Best result:', best_result)
+
+    global out_subdir
+    out_subdir = os.path.join(PLOTS_DIR, emotion)
     print()
 
 file1 = 'training_1.csv'
