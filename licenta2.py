@@ -24,11 +24,12 @@ NR_VALIDATION_SAMPLES = 1
 
 ALPHA = 1
 
-int_bounds = ('int', [2, 10])
+degree_bounds = ('int', [2, 10])
+n_frequencies_bounds = ('int', [2, 9])
 threshold_bounds = ('cont', [0, 0.1])
 alpha_bounds = ('cont', [0, 1e-12])
 
-GPGO_ITERATIONS = 20
+GPGO_ITERATIONS = 10
 CPU_CORES_FOR_GPGO = int(os.getenv('CPU_CORES_FOR_GPGO', 4))
 
 PLOTS_DIR = 'out'
@@ -189,8 +190,8 @@ def plot_data():
         plt.show() if SHOW_PLOTS else plt.close()
 
 
-def run_gpgo_and_get_results(data):
-    gpgo = GPGO(surogate, acq, get_objective_function(data), param_bounds, n_jobs=CPU_CORES_FOR_GPGO)
+def run_gpgo_and_get_result(matrix):
+    gpgo = GPGO(surogate, acq, get_objective_function(matrix), param_bounds, n_jobs=CPU_CORES_FOR_GPGO)
 
     # Run Bayesian Optimization
     start_time = datetime.datetime.now().isoformat()
@@ -209,7 +210,19 @@ def run_gpgo_and_get_results(data):
     return gpgo.getResult()
 
 
-t = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
+# make sure the out dir exists
+if not os.path.exists(PLOTS_DIR):
+    os.makedirs(PLOTS_DIR)
+
+"""
+if 429 Too Many Requests is thrown by PyCharm when plotting the graphs, then 
+https://youtrack.jetbrains.com/issue/PY-43687/Problems-with-many-plots-in-scientific-view#focus=Comments-27-6266042.0-0
+"""
+
+# to avoid Tcl_AsyncDelete: async handler deleted by the wrong thread
+# (see more at https://github.com/matplotlib/matplotlib/issues/27713)
+if not SHOW_PLOTS:
+    matplotlib.use('Agg')
 
 plot_hyperparams_and_error_runs = 0
 plot_derivatives_runs = 0
@@ -217,13 +230,13 @@ plot_derivatives_runs = 0
 print(f'Using {CPU_CORES_FOR_GPGO} CPU cores for GPGO')
 channel_to_index = read_channel_indices('Channel Order.csv', CHANNELS)
 print(f'channel_to_index: {channel_to_index}')
+print()
 channel_index_list = list(channel_to_index.values())
 
 # Define the parameter space
-# TODO: find the type for lambda_val & threshold
 param_bounds = {
-    'degree': int_bounds,
-    'n_frequencies': int_bounds,
+    'degree': degree_bounds,
+    'n_frequencies': n_frequencies_bounds,
     'lambda_val': threshold_bounds,
     'threshold': alpha_bounds
 }
@@ -232,6 +245,8 @@ param_bounds = {
 cov = squaredExponential()
 surogate = GaussianProcess(cov)
 acq = Acquisition(mode='ExpectedImprovement')
+
+t = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
 
 for emotion_i, emotion in enumerate(EMOTIONS):
     print(f'Running for emotion {emotion_i + 1}/{len(EMOTIONS)}: {emotion}')
@@ -249,10 +264,11 @@ for emotion_i, emotion in enumerate(EMOTIONS):
     best_results = []
     for training_sample_i, training_sample in enumerate(training_samples):
         print(f'Running for training sample {training_sample_i + 1}/{len(training_samples)}: {training_sample}')
-        data = read_data(f'{emotion}/{training_sample}', DATA_WIDTH, channel_index_list)
-        best_results.append(run_gpgo_and_get_results(data))
+        data_matrix = read_data(f'{emotion}/{training_sample}', DATA_WIDTH, channel_index_list)
+        best_results.append(run_gpgo_and_get_result(data_matrix))
 
     print(best_results)
+    print()
 
 file1 = 'training_1.csv'
 file2 = 'training_2.csv'
@@ -272,7 +288,7 @@ t_columns = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
 
 
 # Run gpgo and get the best parameters
-best_params1 = run_gpgo_and_get_results(data1)
+best_params1 = run_gpgo_and_get_result(data1)
 
 print("Best Parameters:")
 print(best_params1)
@@ -292,21 +308,6 @@ data1_error, model1, data1_x_dot, data1_x_dot_predicted = get_error_model_and_de
 print("Best Model Predictions:")
 print(data1_x_dot_predicted)
 
-
-# make sure the out dir exists
-if not os.path.exists(PLOTS_DIR):
-    os.makedirs(PLOTS_DIR)
-
-"""
-if 429 Too Many Requests is thrown by PyCharm when plotting the graphs, then 
-https://youtrack.jetbrains.com/issue/PY-43687/Problems-with-many-plots-in-scientific-view#focus=Comments-27-6266042.0-0
-"""
-
-# to avoid Tcl_AsyncDelete: async handler deleted by the wrong thread
-# (see more at https://github.com/matplotlib/matplotlib/issues/27713)
-if not SHOW_PLOTS:
-    matplotlib.use('Agg')
-
 plot_data()
 plot_hyperparams_and_error()
 plot_derivatives(file1, data1_x_dot, data1_x_dot_predicted)
@@ -318,7 +319,7 @@ plot_hyperparams_and_error()
 plot_derivatives(file2, data2_x_dot, data2_x_dot_predicted)
 print("plotted graphs after 1st GPGO run")
 
-best_params2 = run_gpgo_and_get_results(data2)
+best_params2 = run_gpgo_and_get_result(data2)
 
 best_error1 = best_params1[1]
 best_error2 = best_params2[1]
