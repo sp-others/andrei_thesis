@@ -23,13 +23,14 @@ DATA_WIDTH = 5  # number of columns used from the csv file
 NR_TRAINING_SAMPLES = 3
 NR_VALIDATION_SAMPLES = 2
 
+STLSQ_NORMALIZE_COLUMNS = True
 USE_NEGATIVE_ERROR = True
 ALPHA = 1
 
 degree_bounds = ('int', [2, 10])
-n_frequencies_bounds = ('int', [2, 9])
-threshold_bounds = ('cont', [0, 0.001])
-lambda_bounds = ('cont', [0, 1e-16])
+n_frequencies_bounds = ('int', [2, 10])
+threshold_bounds = ('cont', [0, 10 ** -5])
+lambda_bounds = ('cont', [0, 1e-20])
 
 GPGO_ITERATIONS = 10
 GPGO_INIT_EVALS = 3
@@ -142,7 +143,8 @@ def get_fitted_model(x, params: Params):
     poly_library = PolynomialLibrary(degree=int(params.degree), include_bias=True)
     fourier_library = FourierLibrary(n_frequencies=int(params.n_frequencies))
     feature_library = poly_library + fourier_library
-    model = SINDy(feature_library=feature_library, optimizer=STLSQ(threshold=params.threshold, alpha=params.lambda_val))
+    optimizer = STLSQ(threshold=params.threshold, alpha=params.lambda_val, normalize_columns=STLSQ_NORMALIZE_COLUMNS)
+    model = SINDy(feature_library=feature_library, optimizer=optimizer)
     return model.fit(x, t=t)
 
 

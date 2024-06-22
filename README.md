@@ -8,12 +8,13 @@ you can tweak the following in the 'tweak-able constants' region
 2. the channels it uses (it automatically gets those channel from the whole 62-channel data files)
 3. the number of columns used
 4. the number of training samples and validation samples (then it chooses the files randomly)
-5. whether to use negative sign when computing error (and this is taken into account when computing the best parameters)
-6. ALHPA, as before
-7. the bounds for the hyperparameters
-8. the number of iterations for GPGO
-9. the number of init iterations for GPGO
-10. the number of cores GPGO is using
+5. whether STLSQ should normalize columns (when True it seems to solve 'pysindy/optimizers/stlsq.py:191: UserWarning: Sparsity parameter is too big'. Found at https://github.com/dynamicslab/pysindy/issues/93)
+6. whether to use negative sign when computing error (and this is taken into account when computing the best parameters)
+7. ALHPA, as before
+8. the bounds for the hyperparameters
+9. the number of iterations for GPGO
+10. the number of init iterations for GPGO
+11. the number of cores GPGO is using
 
 
 
