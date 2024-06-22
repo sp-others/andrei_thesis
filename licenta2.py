@@ -41,11 +41,14 @@ error_history = []
 
 
 def read_channel_indices(file_path, channel_list):
+    """
+    :return: a dictionary that maps the channel name to its index (0-based) in the data file
+    """
     channel_indices = {}
     with open(file_path, 'r') as file:
         for index, channel_name in enumerate(file.read().splitlines()):
             if channel_name in channel_list:
-                channel_indices[channel_name] = index + 1
+                channel_indices[channel_name] = index
     return channel_indices
 
 
@@ -211,6 +214,7 @@ plot_derivatives_runs = 0
 # Load data
 channel_to_index = read_channel_indices('Channel Order.csv', eeg_channels)
 print(f'channel_to_index: {channel_to_index}')
+channel_index_list = list(channel_to_index.values())
 
 file1 = 'training_1.csv'
 file2 = 'training_2.csv'
@@ -220,7 +224,7 @@ data_dict = {file_name: read_data(file_name, DATA_WIDTH) for file_name in file_n
 data1 = data_dict[file1]
 data2 = data_dict[file2]
 data3 = data_dict[file3]
-z = read_data('3_fericire/cz_eeg3.txt', DATA_WIDTH, list(map(lambda x: x-1, channel_to_index.values())))
+z = read_data('3_fericire/cz_eeg3.txt', DATA_WIDTH, channel_index_list)
 
 # Assuming time vector t and derivative x_dot are known
 # For the sake of this example, let's create synthetic ones
