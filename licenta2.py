@@ -63,8 +63,7 @@ def read_data(filename, last_column_number=None, use_rows: List[int] = None):
     """
     used_columns = None if last_column_number is None else list(range(last_column_number))
     skip_rows = None if use_rows is None else lambda x: x not in use_rows
-    # TODO: transpose
-    return pd.read_csv(filename, header=None, usecols=used_columns, skiprows=skip_rows).values
+    return pd.read_csv(filename, header=None, usecols=used_columns, skiprows=skip_rows).T
 
 
 # Define the objective function
@@ -228,7 +227,7 @@ z = read_data('3_fericire/cz_eeg3.txt', DATA_WIDTH, channel_index_list)
 
 # Assuming time vector t and derivative x_dot are known
 # For the sake of this example, let's create synthetic ones
-t = np.linspace(1, len(data1), len(data1), dtype=int)
+t = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
 t_columns = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
 # x = data1
 # x_dot = np.gradient(data1, axis=0)  # Replace this with computed derivative if available
