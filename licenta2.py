@@ -1,6 +1,7 @@
 import datetime
 import os
 import time
+from typing import List
 
 import matplotlib
 import numpy as np
@@ -49,18 +50,18 @@ def read_channel_indices(file_path, channel_list):
 
 
 # Function to read the data
-def read_data(filename, last_column_number=None):
+def read_data(filename, last_column_number=None, use_rows: List[int] = None):
     """
     Read data from a CSV file
     :param filename: the csv file that contains the data
     :param last_column_number: if None, all columns are used, else only the first last_column_number columns are used
+    :param use_rows: the rows to use from the csv file (0-indexed)
     :return:
     """
-    if last_column_number is None:
-        used_columns = None
-    else:
-        used_columns = list(range(1, last_column_number + 1))
-    return pd.read_csv(filename, header=None, usecols=used_columns).values
+    used_columns = None if last_column_number is None else list(range(last_column_number))
+    skip_rows = None if use_rows is None else lambda x: x not in use_rows
+    # TODO: transpose
+    return pd.read_csv(filename, header=None, usecols=used_columns, skiprows=skip_rows).values
 
 
 # Define the objective function
@@ -219,6 +220,7 @@ data_dict = {file_name: read_data(file_name, DATA_WIDTH) for file_name in file_n
 data1 = data_dict[file1]
 data2 = data_dict[file2]
 data3 = data_dict[file3]
+z = read_data('3_fericire/cz_eeg3.txt', DATA_WIDTH, list(map(lambda x: x-1, channel_to_index.values())))
 
 # Assuming time vector t and derivative x_dot are known
 # For the sake of this example, let's create synthetic ones
