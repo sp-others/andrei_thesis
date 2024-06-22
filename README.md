@@ -16,7 +16,7 @@ you can tweak the following in the 'tweak-able constants' region
 10. the number of init iterations for GPGO
 11. the number of cores GPGO is using
 
-
+data from https://bcmi.sjtu.edu.cn/~seed/seed-iv.html
 
 ```bash
 sed -n '3p;7p;10p;18p;22p;36p;43p;46p;48p;57p' 3_fericire/cz_eeg3.txt | cut -d, -f1-5

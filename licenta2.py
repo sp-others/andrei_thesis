@@ -110,17 +110,22 @@ def read_data(filename, last_column_number=None, use_rows: List[int] = None):
 def get_objective_function(x):
     def objective(degree, n_frequencies, threshold, lambda_val):
         params = Params(degree, n_frequencies, threshold, lambda_val)
-        return get_error_model_and_derivatives(x, params)[0]
+        return fit(x, params)[0]
 
     return objective
 
 
-def get_error_model_and_derivatives(x, params: Params, save_history=True):
-    model = get_fitted_model(x, params)
-    return get_error_and_derivatives(model, x, params, save_history)
+def fit(x, params: Params, save_history=True):
+    poly_library = PolynomialLibrary(degree=int(params.degree), include_bias=True)
+    fourier_library = FourierLibrary(n_frequencies=int(params.n_frequencies))
+    feature_library = poly_library + fourier_library
+    optimizer = STLSQ(threshold=params.threshold, alpha=params.lambda_val, normalize_columns=STLSQ_NORMALIZE_COLUMNS)
+    model = SINDy(feature_library=feature_library, optimizer=optimizer)
+    model.fit(x, t=t)
+    return compute_error_and_derivatives(model, x, params, save_history)
 
 
-def get_error_and_derivatives(model, x, params: Params, save_history=True):
+def compute_error_and_derivatives(model, x, params: Params, save_history=True):
     x_dot_predicted = model.predict(x)
     x_dot = model.differentiate(x, t=1)
     # model.print()
@@ -136,16 +141,7 @@ def get_error_and_derivatives(model, x, params: Params, save_history=True):
         emotion_error_history.append(error)
         matrix_params_history.append(params.to_tuple())
         matrix_error_history.append(error)
-    return error, model, x_dot, x_dot_predicted
-
-
-def get_fitted_model(x, params: Params):
-    poly_library = PolynomialLibrary(degree=int(params.degree), include_bias=True)
-    fourier_library = FourierLibrary(n_frequencies=int(params.n_frequencies))
-    feature_library = poly_library + fourier_library
-    optimizer = STLSQ(threshold=params.threshold, alpha=params.lambda_val, normalize_columns=STLSQ_NORMALIZE_COLUMNS)
-    model = SINDy(feature_library=feature_library, optimizer=optimizer)
-    return model.fit(x, t=t)
+    return error, x_dot, x_dot_predicted
 
 
 def run_gpgo(matrix) -> Tuple[OrderedDict[str, Union[int, float]], float]:
@@ -302,8 +298,7 @@ for emotion_i, emotion in enumerate(EMOTIONS):
 
         graph_name_prefix = f'1_training_{sample_name_i + 1:00}_{sample_name}'
         params_ = Params.from_tuple_list(result[0])
-        _, _, computed_derivative, predicted_derivative = get_error_model_and_derivatives(transposed_matrix, params_,
-                                                                                          False)
+        _, computed_derivative, predicted_derivative = fit(transposed_matrix, params_, False)
 
         plot_data(sample_name, transposed_matrix)
         plot_derivative_and_channel_comparison(sample_name, computed_derivative.T, predicted_derivative.T)
@@ -325,8 +320,7 @@ for emotion_i, emotion in enumerate(EMOTIONS):
         transposed_matrix = read_data(f'{emotion}/{sample_name}', DATA_WIDTH, channel_index_list)
 
         graph_name_prefix = f'2_validation_{sample_name_i + 1:00}_{sample_name}'
-        _, _, computed_derivative, predicted_derivative = get_error_model_and_derivatives(transposed_matrix,
-                                                                                          best_params, False)
+        _, computed_derivative, predicted_derivative = fit(transposed_matrix, best_params, False)
 
         plot_data(sample_name, transposed_matrix)
         plot_derivative_and_channel_comparison(sample_name, computed_derivative.T, predicted_derivative.T)
