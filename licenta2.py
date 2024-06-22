@@ -19,7 +19,7 @@ F5|FC1|P5|CP1|P4|PO8|FP2|FC6|FZ|PZ
 3p;7p;10p;18p;22p;36p;43p;46p;48p;57p
 """
 
-eeg_channels = ["CH_F5", "CH_FC1", "CH_P5", "CH_CP1", "CH_P4", "CH_PO8", "CH_FP2", "CH_FC6", "CH_FZ", "CH_PZ"]
+eeg_channels = ["F5", "FC1", "P5", "CP1", "P4", "PO8", "FP2", "FC6", "FZ", "PZ"]
 
 DATA_WIDTH = 5  # number of columns used from the csv file
 
@@ -37,6 +37,15 @@ SHOW_PLOTS = False  # whether to show the plots interactively or not (recommend 
 # Initialize history storage
 hyperparameter_history = []
 error_history = []
+
+
+def read_channel_indices(file_path, channel_list):
+    channel_indices = {}
+    with open(file_path, 'r') as file:
+        for index, channel_name in enumerate(file.read().splitlines()):
+            if channel_name in channel_list:
+                channel_indices[channel_name] = index + 1
+    return channel_indices
 
 
 # Function to read the data
@@ -199,6 +208,8 @@ plot_hyperparams_and_error_runs = 0
 plot_derivatives_runs = 0
 
 # Load data
+channel_to_index = read_channel_indices('Channel Order.csv', eeg_channels)
+print(f'channel_to_index: {channel_to_index}')
 
 file1 = 'training_1.csv'
 file2 = 'training_2.csv'
