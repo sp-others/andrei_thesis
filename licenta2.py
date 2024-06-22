@@ -22,6 +22,7 @@ DATA_WIDTH = 5  # number of columns used from the csv file
 NR_TRAINING_SAMPLES = 2
 NR_VALIDATION_SAMPLES = 1
 
+USE_NEGATIVE_ERROR = True
 ALPHA = 1
 
 degree_bounds = ('int', [2, 10])
@@ -36,7 +37,11 @@ PLOTS_DIR = 'out'
 SHOW_PLOTS = False  # whether to show the plots interactively or not (recommend to use False when displaying many plots)
 # endregion
 
+# region computed properties
 nr_samples = NR_TRAINING_SAMPLES + NR_VALIDATION_SAMPLES
+
+error_sign = -1 ** USE_NEGATIVE_ERROR
+# endregion
 
 # Initialize history storage
 hyperparameter_history = []
@@ -86,9 +91,10 @@ def get_error_and_derivatives(model, x, degree, lambda_val, n_frequencies, thres
     x_dot_predicted = model.predict(x)
     x_dot = model.differentiate(x, t=1)
     # model.print()
-    error = -(model.score(x, metric=mean_squared_error) + ALPHA * model.complexity)
+    unsigned_error = model.score(x, metric=mean_squared_error) + ALPHA * model.complexity
+    error = error_sign * unsigned_error
     if all(equation == '0.000' for equation in model.equations()):
-        error = - 10 ** 5
+        error = error_sign * 10 ** 5
 
     # Store hyperparameters and error for plotting
     if save_metadata:
@@ -256,7 +262,7 @@ for emotion_i, emotion in enumerate(EMOTIONS):
         print(f'Not enough data files for emotion {emotion}. Skipping...')
         continue
 
-    chosen_samples = random.sample(data_files, nr_samples)
+    chosen_samples: List[str] = random.sample(data_files, nr_samples)
     training_samples, validation_samples = chosen_samples[:NR_TRAINING_SAMPLES], chosen_samples[NR_TRAINING_SAMPLES:]
     print(f'Training samples: {training_samples}')
     print(f'Validation samples: {validation_samples}')
@@ -265,9 +271,15 @@ for emotion_i, emotion in enumerate(EMOTIONS):
     for training_sample_i, training_sample in enumerate(training_samples):
         print(f'Running for training sample {training_sample_i + 1}/{len(training_samples)}: {training_sample}')
         data_matrix = read_data(f'{emotion}/{training_sample}', DATA_WIDTH, channel_index_list)
-        best_results.append(run_gpgo_and_get_result(data_matrix))
+        best_results.append((training_sample, run_gpgo_and_get_result(data_matrix)))
 
-    print(best_results)
+    print('Best results:')
+    print(*best_results, sep='\n')
+    best_results_sorted = sorted(best_results, key=lambda x: x[1][1], reverse=USE_NEGATIVE_ERROR)
+    print('Best results sorted:')
+    print(*best_results_sorted, sep='\n')
+    best_result = best_results_sorted[0]
+    print('Best result:', best_result)
     print()
 
 file1 = 'training_1.csv'
