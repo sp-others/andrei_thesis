@@ -1,6 +1,21 @@
 # Licenta
 https://github.com/AndreiRaceanu/Bachelor-Thesis
 
+you need to add the 'Channel Order.csv' file in the root directory of the project
+
+you can tweak the following in the 'tweak-able constants' region
+1. the emotions it runs for
+2. the channels it uses (it automatically gets those channel from the whole 62-channel data files)
+3. the number of columns used
+4. the number of training samples and validation samples (then it chooses the files randomly)
+5. whether to use negative sign when computing error (and this is taken into account when computing the best parameters)
+6. ALHPA, as before
+7. the bounds for the hyperparameters
+8. the number of iterations for GPGO
+9. the number of init iterations for GPGO
+10. the number of cores GPGO is using
+
+
 
 ```bash
 sed -n '3p;7p;10p;18p;22p;36p;43p;46p;48p;57p' 3_fericire/cz_eeg3.txt | cut -d, -f1-5
