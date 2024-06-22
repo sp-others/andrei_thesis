@@ -11,6 +11,7 @@ from pyGPGO.covfunc import squaredExponential
 from pysindy import SINDy, PolynomialLibrary, FourierLibrary, STLSQ
 from pyGPGO.surrogates.GaussianProcess import GaussianProcess
 from pyGPGO.acquisition import Acquisition
+from sklearn.metrics import mean_squared_error
 
 """
 channels:
