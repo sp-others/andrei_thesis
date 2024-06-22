@@ -157,6 +157,20 @@ def run_gpgo_and_get_result(matrix) -> Tuple[OrderedDict[str, Union[int, float]]
     return gpgo.getResult()
 
 
+def plot_data():
+    for name, data in data_dict.items():
+        plt.figure(figsize=(12, len(CHANNELS)))
+        for j, eeg_data in enumerate(data):
+            plt.plot(t_columns, data[j], label=f'{j + 1:00}: {CHANNELS[j]}')
+
+        plt.xlabel('Time (s)')
+        plt.ylabel('Amplitude')
+        plt.title(f'EEG Data from {name}')
+        plt.legend(loc='upper right')
+        plt.savefig(f'out/data_{name}.png', bbox_inches='tight')
+        plt.show() if SHOW_PLOTS else plt.close()
+
+
 def plot_derivatives(file_name, computed_derivative, predicted_derivative):
     global plot_derivatives_runs
     runs = plot_derivatives_runs
@@ -225,20 +239,6 @@ def plot_hyperparams_and_error():
     plt.title('Evolution of Error')
     plt.savefig(f'out/error{plot_hyperparams_and_error_runs}_threshold.png', bbox_inches='tight')
     plt.show() if SHOW_PLOTS else plt.close()
-
-
-def plot_data():
-    for name, data in data_dict.items():
-        plt.figure(figsize=(12, len(CHANNELS)))
-        for j, eeg_data in enumerate(data):
-            plt.plot(t_columns, data[j], label=f'{j + 1:00}: {CHANNELS[j]}')
-
-        plt.xlabel('Time (s)')
-        plt.ylabel('Amplitude')
-        plt.title(f'EEG Data from {name}')
-        plt.legend(loc='upper right')
-        plt.savefig(f'out/data_{name}.png', bbox_inches='tight')
-        plt.show() if SHOW_PLOTS else plt.close()
 
 
 # make sure the out dir exists
