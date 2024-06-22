@@ -28,15 +28,17 @@ ALPHA = 1
 
 degree_bounds = ('int', [2, 10])
 n_frequencies_bounds = ('int', [2, 9])
-threshold_bounds = ('cont', [0, 0.1])
-lambda_bounds = ('cont', [0, 1e-12])
+threshold_bounds = ('cont', [0, 0.001])
+lambda_bounds = ('cont', [0, 1e-16])
 
-GPGO_ITERATIONS = 10
+GPGO_ITERATIONS = 5
+GPGO_INIT_EVALS = 3
 CPU_CORES_FOR_GPGO = int(os.getenv('CPU_CORES_FOR_GPGO', 4))
 
 PLOTS_DIR = 'out'
 SHOW_PLOTS = False  # whether to show the plots interactively or not (recommend to use False when displaying many plots)
 # endregion
+
 
 # region computed properties
 nr_samples = NR_TRAINING_SAMPLES + NR_VALIDATION_SAMPLES
@@ -44,9 +46,15 @@ nr_samples = NR_TRAINING_SAMPLES + NR_VALIDATION_SAMPLES
 error_sign = -1 ** USE_NEGATIVE_ERROR
 # endregion
 
+
+out_subdir = None
+graph_name_prefix = None
+
 # Initialize history storage
-hyperparameter_history = []
-error_history = []
+emotion_params_history = []
+emotion_error_history = []
+matrix_params_history = []
+matrix_error_history = []
 
 
 class Params:
@@ -106,25 +114,27 @@ def get_objective_function(x):
     return objective
 
 
-def get_error_model_and_derivatives(x, params: Params, save_metadata=True):
+def get_error_model_and_derivatives(x, params: Params, save_history=True):
     model = get_fitted_model(x, params)
-    return get_error_and_derivatives(model, x, params, save_metadata)
+    return get_error_and_derivatives(model, x, params, save_history)
 
 
-def get_error_and_derivatives(model, x, params: Params, save_metadata=True):
+def get_error_and_derivatives(model, x, params: Params, save_history=True):
     x_dot_predicted = model.predict(x)
     x_dot = model.differentiate(x, t=1)
     # model.print()
     unsigned_error = model.score(x, metric=mean_squared_error) + ALPHA * model.complexity
     error = error_sign * unsigned_error
     if all(equation == '0.000' for equation in model.equations()):
-        error = error_sign * 10 ** 5
+        error = error_sign * 10 ** 4
 
     # Store hyperparameters and error for plotting
-    if save_metadata:
-        global hyperparameter_history, error_history
-        hyperparameter_history.append(params.to_tuple())
-        error_history.append(error)
+    if save_history:
+        global emotion_params_history, emotion_error_history, matrix_params_history, matrix_error_history
+        emotion_params_history.append(params.to_tuple())
+        emotion_error_history.append(error)
+        matrix_params_history.append(params.to_tuple())
+        matrix_error_history.append(error)
     return error, model, x_dot, x_dot_predicted
 
 
@@ -143,7 +153,7 @@ def run_gpgo(matrix) -> Tuple[OrderedDict[str, Union[int, float]], float]:
     start_time = datetime.datetime.now().isoformat()
     start = time.time()
     print(start_time)
-    gpgo.run(max_iter=GPGO_ITERATIONS)
+    gpgo.run(max_iter=GPGO_ITERATIONS, init_evals=GPGO_INIT_EVALS)
     end_time = datetime.datetime.now().isoformat()
     end = time.time()
 
@@ -157,55 +167,73 @@ def run_gpgo(matrix) -> Tuple[OrderedDict[str, Union[int, float]], float]:
     return gpgo.getResult()
 
 
-def plot_matrix():
-    for name, data in data_dict.items():
-        plt.figure(figsize=(12, len(CHANNELS)))
-        for j, eeg_data in enumerate(data):
-            plt.plot(t_columns, data[j], label=f'{j + 1:00}: {CHANNELS[j]}')
+def plot_data(matrix_name: str, matrix_to_plot):
+    plt.figure(figsize=(12, len(CHANNELS)))
+    for i, eeg_data in enumerate(matrix_to_plot):
+        plt.plot(t, matrix_to_plot[i], label=f'{i + 1:00}: {CHANNELS[i]}')
 
-        plt.xlabel('Time (s)')
-        plt.ylabel('Amplitude')
-        plt.title(f'EEG Data from {name}')
-        plt.legend(loc='upper right')
-        plt.savefig(f'out/data_{name}.png', bbox_inches='tight')
-        plt.show() if SHOW_PLOTS else plt.close()
+    plt.xlabel('Time (s)')
+    plt.ylabel('Amplitude')
+    plt.title(f'EEG Data from {matrix_name}')
+    plt.legend(loc='upper right')
+    save_plot('1data')
 
 
-def plot_derivative_and_channel_comparison(file_name, computed_derivative, predicted_derivative):
-    global plot_derivatives_runs
-    runs = plot_derivatives_runs
+def plot_derivative_and_channel_comparison(file_name, computed_derivative_, predicted_derivative_):
     # plot the 2 derivatives, fully
-    for derivative_type, derivative in {'predicted': predicted_derivative, 'computed': computed_derivative}.items():
+    for derivative_type, derivative in {'computed': computed_derivative_, 'predicted': predicted_derivative_}.items():
         plt.figure()
         plt.plot(t, derivative)
         plt.xlabel('Time')
         plt.ylabel('Derivative')
         plt.title(f'{derivative_type} Derivative for {file_name}')
-        plt.savefig(f'out/derivative{runs}_{file_name}_full_{derivative_type}.png', bbox_inches='tight')
-        plt.show() if SHOW_PLOTS else plt.close()
+        save_plot(f'2derivative_{derivative_type}')
     # plot a plot for each set of channels from both derivatives
     for i, channel in enumerate(CHANNELS):
         plt.figure(figsize=(12, len(CHANNELS)))
-        plt.plot(t_columns, computed_derivative[i], 'k', label=f'{channel} computed derivative')
-        plt.plot(t_columns, predicted_derivative[i], 'r--', label=f'{channel} predicted derivative')
+        plt.plot(t, computed_derivative_[i], 'k', label=f'{channel} computed derivative')
+        plt.plot(t, predicted_derivative_[i], 'r--', label=f'{channel} predicted derivative')
         plt.xlabel('Time (s)')
         plt.ylabel('Amplitude')
         plt.title(f'predicted vs computed for data {file_name} for channel {channel}')
         plt.legend(loc='upper right')
-        plt.savefig(f'out/derivative{runs}_{file_name}_{channel}.png', bbox_inches='tight')
-        plt.show() if SHOW_PLOTS else plt.close()
+        save_plot(f'3derivative_comparison_{channel}')
 
 
 def plot_hyperparams_and_error():
-    global hyperparameter_history, plot_hyperparams_and_error_runs
-    hyperparameter_history_as_np_array = np.array(hyperparameter_history)
+    level_param_history_error_history_tuples = [
+        ('emotion', emotion_params_history, emotion_error_history),
+        ('matrix', matrix_params_history, matrix_error_history)
+    ]
+    for level, params_history, error_history in level_param_history_error_history_tuples:
+        params_history_as_np = np.array(params_history)
+        plot_sets = [
+            ('params_degree_and_n-frequencies',
+             [('degree', params_history_as_np[:, 0]), ('n_frequencies', params_history_as_np[:, 1])]),
+            ('params_threshold', [('threshold', params_history_as_np[:, 2])]),
+            ('params_lambda_val', [('lambda_val', params_history_as_np[:, 3])]),
+            ('error', [('error', error_history)])
+        ]
+        for y_label, plot_set in plot_sets:
+            plt.figure()
+            for label, data in plot_set:
+                plt.plot(data, label=label)
+            plt.xlabel('Iteration')
+            plt.ylabel(y_label)
+            plt.legend()
+            plt.title(f'Evolution of {y_label} at {level} level')
+            save_plot(f'4{level}_{y_label}')
+
+    global plot_hyperparams_and_error_runs
     plot_hyperparams_and_error_runs += 1
+
     savefig_prefix = f'out/hyperparams_and_error_{plot_hyperparams_and_error_runs}'
 
+    emotion_params_hist_np = np.array(emotion_params_history)
     # Plot evolution of hyperparameters (degree & n_frequencies)
     plt.figure()
-    plt.plot(hyperparameter_history_as_np_array[:, 0], label='degree')
-    plt.plot(hyperparameter_history_as_np_array[:, 1], label='n_frequencies')
+    plt.plot(emotion_params_hist_np[:, 0], label='degree')
+    plt.plot(emotion_params_hist_np[:, 1], label='n_frequencies')
     plt.xlabel('Iteration')
     plt.ylabel('Hyperparameter Value')
     plt.legend()
@@ -214,7 +242,7 @@ def plot_hyperparams_and_error():
     plt.show() if SHOW_PLOTS else plt.close()
     # Plot evolution of hyperparameters (lambda_val)
     plt.figure()
-    plt.plot(hyperparameter_history_as_np_array[:, 2], label='lambda_val')
+    plt.plot(emotion_params_hist_np[:, 2], label='lambda_val')
     plt.xlabel('Iteration')
     plt.ylabel('Hyperparameter Value')
     plt.legend()
@@ -223,7 +251,7 @@ def plot_hyperparams_and_error():
     plt.show() if SHOW_PLOTS else plt.close()
     # Plot evolution of hyperparameters (threshold)
     plt.figure()
-    plt.plot(hyperparameter_history_as_np_array[:, 3], label='threshold')
+    plt.plot(emotion_params_hist_np[:, 3], label='threshold')
     plt.xlabel('Iteration')
     plt.ylabel('Hyperparameter Value')
     plt.legend()
@@ -232,7 +260,7 @@ def plot_hyperparams_and_error():
     plt.show() if SHOW_PLOTS else plt.close()
     # Plot evolution of error
     plt.figure()
-    plt.plot(sorted(error_history, reverse=True), label='Error')
+    plt.plot(sorted(emotion_error_history, reverse=True), label='Error')
     plt.xlabel('Iteration')
     plt.ylabel('Error')
     plt.legend()
@@ -241,9 +269,14 @@ def plot_hyperparams_and_error():
     plt.show() if SHOW_PLOTS else plt.close()
 
 
+def save_plot(name: str):
+    plt.savefig(os.path.join(out_subdir, f'{graph_name_prefix}_{name}.png'), bbox_inches='tight')
+    plt.show() if SHOW_PLOTS else plt.close()
+
+
 # make sure the out dir exists
-if not os.path.exists(PLOTS_DIR):
-    os.makedirs(PLOTS_DIR)
+for emotion in EMOTIONS:
+    os.makedirs(os.path.join(PLOTS_DIR, emotion), exist_ok=True)
 
 """
 if 429 Too Many Requests is thrown by PyCharm when plotting the graphs, then 
@@ -277,13 +310,15 @@ cov = squaredExponential()
 surogate = GaussianProcess(cov)
 acq = Acquisition(mode='ExpectedImprovement')
 
-t = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
+t = np.linspace(0, DATA_WIDTH - 1, DATA_WIDTH, dtype=int)
+t_channels = np.linspace(0, len(CHANNELS) - 1, len(CHANNELS), dtype=int)
 
 for emotion_i, emotion in enumerate(EMOTIONS):
     print(f'Running for emotion {emotion_i + 1}/{len(EMOTIONS)}: {emotion}')
 
-    global out_subdir
     out_subdir = os.path.join(PLOTS_DIR, emotion)
+    emotion_params_history = []
+    emotion_error_history = []
 
     data_files = os.listdir(emotion)
 
@@ -301,12 +336,21 @@ for emotion_i, emotion in enumerate(EMOTIONS):
     for sample_name_i, sample_name in enumerate(training_samples):
         print(f'Running for training sample {sample_name_i + 1}/{len(training_samples)}: {sample_name}')
         transposed_matrix = read_data(f'{emotion}/{sample_name}', DATA_WIDTH, channel_index_list)
+
+        matrix_params_history = []
+        matrix_error_history = []
         result = run_gpgo(transposed_matrix)
         list_of_name_and_result.append((sample_name, result))
 
-        # TODO: plot_matrix(sample_name, transposed_matrix)
-        # TODO: plot_derivative_and_channel_comparison(sample_name, transposed_matrix, result)
-        # TODO: plot_hyperparams_and_error()  # TODO: print at every matrix in the emotion, but reset at every emotion
+        data_matrix = transposed_matrix.transpose()
+        graph_name_prefix = f'training_{sample_name_i + 1:00}_{sample_name}'
+        params_ = Params.from_tuple_list(result[0])
+        _, _, computed_derivative, predicted_derivative = get_error_model_and_derivatives(transposed_matrix, params_,
+                                                                                          False)
+
+        plot_data(sample_name, transposed_matrix)
+        plot_derivative_and_channel_comparison(sample_name, computed_derivative, predicted_derivative)
+        plot_hyperparams_and_error()
 
     print('Best results:')
     print(*list_of_name_and_result, sep='\n')
@@ -333,7 +377,6 @@ z = read_data('3_fericire/cz_eeg3.txt', DATA_WIDTH, channel_index_list)
 
 # Assuming time vector t and derivative x_dot are known
 # For the sake of this example, let's create synthetic ones
-t_columns = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
 # x = data1
 # x_dot = np.gradient(data1, axis=0)  # Replace this with computed derivative if available
 
@@ -348,12 +391,12 @@ print(best_result1)
 best_params1 = Params.from_tuple_list(best_result1[0])
 
 data1_error, model1, data1_x_dot, data1_x_dot_predicted = get_error_model_and_derivatives(data1, best_params1,
-                                                                                          save_metadata=False)
+                                                                                          save_history=False)
 
 print("Best Model Predictions:")
 print(data1_x_dot_predicted)
 
-plot_matrix()
+# plot_data()
 plot_hyperparams_and_error()
 plot_derivative_and_channel_comparison(file1, data1_x_dot, data1_x_dot_predicted)
 data2_error, model2, data2_x_dot, data2_x_dot_predicted = get_error_and_derivatives(model1, data2, best_params1)
@@ -378,13 +421,13 @@ else:
 best_params = Params.from_tuple_list(best_result[0])
 
 data1_error, model1, data1_x_dot, data1_x_dot_predicted = get_error_model_and_derivatives(data1, best_params,
-                                                                                          save_metadata=False)
+                                                                                          save_history=False)
 plot_derivatives_runs += 1
 plot_hyperparams_and_error()
 plot_derivative_and_channel_comparison(file1, data1_x_dot, data1_x_dot_predicted)
 
 data2_error, model2, data2_x_dot, data2_x_dot_predicted = get_error_model_and_derivatives(data2, best_params,
-                                                                                          save_metadata=False)
+                                                                                          save_history=False)
 
 plot_derivative_and_channel_comparison(file2, data2_x_dot, data2_x_dot_predicted)
 print("plotted graphs after 2nd GPGO run")
