@@ -8,7 +8,7 @@ sed -n '3p;7p;10p;18p;22p;36p;43p;46p;48p;57p' 3_fericire/cz_eeg3.txt | cut -d, 
 ```
 
 # TODO: 2024 06 22 22:04
-1. fix derivative plotting
+1. ~~fix derivative plotting~~
 
 # TODO: 2024 06 18 18:40
 

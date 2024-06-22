@@ -183,7 +183,7 @@ def plot_derivative_and_channel_comparison(file_name, computed_derivative_, pred
     # plot the 2 derivatives, fully
     for derivative_type, derivative in {'computed': computed_derivative_, 'predicted': predicted_derivative_}.items():
         plt.figure()
-        plt.plot(t, derivative)
+        plt.plot(t, derivative.T)
         plt.xlabel('Time')
         plt.ylabel('Derivative')
         plt.title(f'{derivative_type} Derivative for {file_name}')
@@ -298,14 +298,13 @@ for emotion_i, emotion in enumerate(EMOTIONS):
         result = run_gpgo(transposed_matrix)
         list_of_name_and_result.append((sample_name, result))
 
-        data_matrix = transposed_matrix.transpose()
         graph_name_prefix = f'training_{sample_name_i + 1:00}_{sample_name}'
         params_ = Params.from_tuple_list(result[0])
         _, _, computed_derivative, predicted_derivative = get_error_model_and_derivatives(transposed_matrix, params_,
                                                                                           False)
 
         plot_data(sample_name, transposed_matrix)
-        plot_derivative_and_channel_comparison(sample_name, computed_derivative, predicted_derivative)
+        plot_derivative_and_channel_comparison(sample_name, computed_derivative.T, predicted_derivative.T)
         plot_hyperparams_and_error()
 
     print('Best results:')
