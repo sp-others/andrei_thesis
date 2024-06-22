@@ -1,5 +1,6 @@
 import datetime
 import os
+import random
 import time
 from typing import List
 
@@ -14,15 +15,12 @@ from pyGPGO.surrogates.GaussianProcess import GaussianProcess
 from pyGPGO.acquisition import Acquisition
 from sklearn.metrics import mean_squared_error
 
-"""
-channels:
-F5|FC1|P5|CP1|P4|PO8|FP2|FC6|FZ|PZ
-3p;7p;10p;18p;22p;36p;43p;46p;48p;57p
-"""
-
-eeg_channels = ["F5", "FC1", "P5", "CP1", "P4", "PO8", "FP2", "FC6", "FZ", "PZ"]
-
+# region tweak-able constants
+EMOTIONS = ['0_neutru', '1_tristete', '2_teama', '3_fericire']
+CHANNELS = ["F5", "FC1", "P5", "CP1", "P4", "PO8", "FP2", "FC6", "FZ", "PZ"]
 DATA_WIDTH = 5  # number of columns used from the csv file
+NR_TRAINING_SAMPLES = 2
+NR_VALIDATION_SAMPLES = 1
 
 ALPHA = 1
 
@@ -34,6 +32,9 @@ GPGO_ITERATIONS = 20
 CPU_CORES_FOR_GPGO = int(os.getenv('CPU_CORES_FOR_GPGO', 4))
 
 SHOW_PLOTS = False  # whether to show the plots interactively or not (recommend to use False when displaying many plots)
+# endregion
+
+nr_samples = NR_TRAINING_SAMPLES + NR_VALIDATION_SAMPLES
 
 # Initialize history storage
 hyperparameter_history = []
@@ -116,8 +117,8 @@ def plot_derivatives(file_name, computed_derivative, predicted_derivative):
         plt.savefig(f'out/derivative{runs}_{file_name}_full_{derivative_type}.png', bbox_inches='tight')
         plt.show() if SHOW_PLOTS else plt.close()
     # plot a plot for each set of channels from both derivatives
-    for i, channel in enumerate(eeg_channels):
-        plt.figure(figsize=(12, len(eeg_channels)))
+    for i, channel in enumerate(CHANNELS):
+        plt.figure(figsize=(12, len(CHANNELS)))
         plt.plot(t_columns, computed_derivative[i], 'k', label=f'{channel} computed derivative')
         plt.plot(t_columns, predicted_derivative[i], 'r--', label=f'{channel} predicted derivative')
         plt.xlabel('Time (s)')
@@ -175,9 +176,9 @@ def plot_hyperparams_and_error():
 
 def plot_data():
     for name, data in data_dict.items():
-        plt.figure(figsize=(12, len(eeg_channels)))
+        plt.figure(figsize=(12, len(CHANNELS)))
         for j, eeg_data in enumerate(data):
-            plt.plot(t_columns, data[j], label=f'{j + 1:00}: {eeg_channels[j]}')
+            plt.plot(t_columns, data[j], label=f'{j + 1:00}: {CHANNELS[j]}')
 
         plt.xlabel('Time (s)')
         plt.ylabel('Amplitude')
@@ -207,30 +208,15 @@ def run_gpgo_and_get_results(data):
     return gpgo.getResult()
 
 
+t = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
+
 plot_hyperparams_and_error_runs = 0
 plot_derivatives_runs = 0
 
-# Load data
-channel_to_index = read_channel_indices('Channel Order.csv', eeg_channels)
+print(f'Using {CPU_CORES_FOR_GPGO} CPU cores for GPGO')
+channel_to_index = read_channel_indices('Channel Order.csv', CHANNELS)
 print(f'channel_to_index: {channel_to_index}')
 channel_index_list = list(channel_to_index.values())
-
-file1 = 'training_1.csv'
-file2 = 'training_2.csv'
-file3 = 'validation_1.csv'
-file_names = [file1, file2, file3]
-data_dict = {file_name: read_data(file_name, DATA_WIDTH) for file_name in file_names}
-data1 = data_dict[file1]
-data2 = data_dict[file2]
-data3 = data_dict[file3]
-z = read_data('3_fericire/cz_eeg3.txt', DATA_WIDTH, channel_index_list)
-
-# Assuming time vector t and derivative x_dot are known
-# For the sake of this example, let's create synthetic ones
-t = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
-t_columns = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
-# x = data1
-# x_dot = np.gradient(data1, axis=0)  # Replace this with computed derivative if available
 
 # Define the parameter space
 # TODO: find the type for lambda_val & threshold
@@ -246,8 +232,45 @@ cov = squaredExponential()
 surogate = GaussianProcess(cov)
 acq = Acquisition(mode='ExpectedImprovement')
 
+for emotion_i, emotion in enumerate(EMOTIONS):
+    print(f'Running for emotion {emotion_i + 1}/{len(EMOTIONS)}: {emotion}')
+    data_files = os.listdir(emotion)
+
+    if nr_samples > len(data_files):
+        print(f'Not enough data files for emotion {emotion}. Skipping...')
+        continue
+
+    chosen_samples = random.sample(data_files, nr_samples)
+    training_samples, validation_samples = chosen_samples[:NR_TRAINING_SAMPLES], chosen_samples[NR_TRAINING_SAMPLES:]
+    print(f'Training samples: {training_samples}')
+    print(f'Validation samples: {validation_samples}')
+
+    best_results = []
+    for training_sample_i, training_sample in enumerate(training_samples):
+        print(f'Running for training sample {training_sample_i + 1}/{len(training_samples)}: {training_sample}')
+        data = read_data(f'{emotion}/{training_sample}', DATA_WIDTH, channel_index_list)
+        best_results.append(run_gpgo_and_get_results(data))
+
+    print(best_results)
+
+file1 = 'training_1.csv'
+file2 = 'training_2.csv'
+file3 = 'validation_1.csv'
+file_names = [file1, file2, file3]
+data_dict = {file_name: read_data(file_name, DATA_WIDTH) for file_name in file_names}
+data1 = data_dict[file1]
+data2 = data_dict[file2]
+data3 = data_dict[file3]
+z = read_data('3_fericire/cz_eeg3.txt', DATA_WIDTH, channel_index_list)
+
+# Assuming time vector t and derivative x_dot are known
+# For the sake of this example, let's create synthetic ones
+t_columns = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
+# x = data1
+# x_dot = np.gradient(data1, axis=0)  # Replace this with computed derivative if available
+
+
 # Run gpgo and get the best parameters
-print(f'Using {CPU_CORES_FOR_GPGO} CPU cores for GPGO')
 best_params1 = run_gpgo_and_get_results(data1)
 
 print("Best Parameters:")
@@ -268,14 +291,15 @@ data1_error, model1, data1_x_dot, data1_x_dot_predicted = get_error_model_and_de
 print("Best Model Predictions:")
 print(data1_x_dot_predicted)
 
-"""
-if 429 Too Many Requests is thrown by PyCharm when plotting the graphs, then 
-https://youtrack.jetbrains.com/issue/PY-43687/Problems-with-many-plots-in-scientific-view#focus=Comments-27-6266042.0-0
-"""
 
 # make sure the out dir exists
 if not os.path.exists('out'):
     os.makedirs('out')
+
+"""
+if 429 Too Many Requests is thrown by PyCharm when plotting the graphs, then 
+https://youtrack.jetbrains.com/issue/PY-43687/Problems-with-many-plots-in-scientific-view#focus=Comments-27-6266042.0-0
+"""
 
 # to avoid Tcl_AsyncDelete: async handler deleted by the wrong thread
 # (see more at https://github.com/matplotlib/matplotlib/issues/27713)
