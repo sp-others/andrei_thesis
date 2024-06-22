@@ -136,7 +136,7 @@ def get_fitted_model(x, params: Params):
     return model.fit(x, t=t)
 
 
-def run_gpgo_and_get_result(matrix) -> Tuple[OrderedDict[str, Union[int, float]], float]:
+def run_gpgo(matrix) -> Tuple[OrderedDict[str, Union[int, float]], float]:
     gpgo = GPGO(surogate, acq, get_objective_function(matrix), param_bounds, n_jobs=CPU_CORES_FOR_GPGO)
 
     # Run Bayesian Optimization
@@ -157,7 +157,7 @@ def run_gpgo_and_get_result(matrix) -> Tuple[OrderedDict[str, Union[int, float]]
     return gpgo.getResult()
 
 
-def plot_data():
+def plot_matrix():
     for name, data in data_dict.items():
         plt.figure(figsize=(12, len(CHANNELS)))
         for j, eeg_data in enumerate(data):
@@ -171,7 +171,7 @@ def plot_data():
         plt.show() if SHOW_PLOTS else plt.close()
 
 
-def plot_derivatives(file_name, computed_derivative, predicted_derivative):
+def plot_derivative_and_channel_comparison(file_name, computed_derivative, predicted_derivative):
     global plot_derivatives_runs
     runs = plot_derivatives_runs
     # plot the 2 derivatives, fully
@@ -301,7 +301,7 @@ for emotion_i, emotion in enumerate(EMOTIONS):
     for sample_name_i, sample_name in enumerate(training_samples):
         print(f'Running for training sample {sample_name_i + 1}/{len(training_samples)}: {sample_name}')
         transposed_matrix = read_data(f'{emotion}/{sample_name}', DATA_WIDTH, channel_index_list)
-        result = run_gpgo_and_get_result(transposed_matrix)
+        result = run_gpgo(transposed_matrix)
         list_of_name_and_result.append((sample_name, result))
 
         # TODO: plot_matrix(sample_name, transposed_matrix)
@@ -339,7 +339,7 @@ t_columns = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
 
 
 # Run gpgo and get the best parameters
-best_result1 = run_gpgo_and_get_result(data1)
+best_result1 = run_gpgo(data1)
 
 print("Best Parameters:")
 print(best_result1)
@@ -353,15 +353,15 @@ data1_error, model1, data1_x_dot, data1_x_dot_predicted = get_error_model_and_de
 print("Best Model Predictions:")
 print(data1_x_dot_predicted)
 
-plot_data()
+plot_matrix()
 plot_hyperparams_and_error()
-plot_derivatives(file1, data1_x_dot, data1_x_dot_predicted)
+plot_derivative_and_channel_comparison(file1, data1_x_dot, data1_x_dot_predicted)
 data2_error, model2, data2_x_dot, data2_x_dot_predicted = get_error_and_derivatives(model1, data2, best_params1)
 plot_hyperparams_and_error()
-plot_derivatives(file2, data2_x_dot, data2_x_dot_predicted)
+plot_derivative_and_channel_comparison(file2, data2_x_dot, data2_x_dot_predicted)
 print("plotted graphs after 1st GPGO run")
 
-best_result2 = run_gpgo_and_get_result(data2)
+best_result2 = run_gpgo(data2)
 best_params2 = Params.from_tuple_list(best_result2[0])
 
 best_error1 = best_result1[1]
@@ -381,16 +381,16 @@ data1_error, model1, data1_x_dot, data1_x_dot_predicted = get_error_model_and_de
                                                                                           save_metadata=False)
 plot_derivatives_runs += 1
 plot_hyperparams_and_error()
-plot_derivatives(file1, data1_x_dot, data1_x_dot_predicted)
+plot_derivative_and_channel_comparison(file1, data1_x_dot, data1_x_dot_predicted)
 
 data2_error, model2, data2_x_dot, data2_x_dot_predicted = get_error_model_and_derivatives(data2, best_params,
                                                                                           save_metadata=False)
 
-plot_derivatives(file2, data2_x_dot, data2_x_dot_predicted)
+plot_derivative_and_channel_comparison(file2, data2_x_dot, data2_x_dot_predicted)
 print("plotted graphs after 2nd GPGO run")
 
 data3_error, model3, data3_x_dot, data3_x_dot_predicted = get_error_model_and_derivatives(data3, best_params)
 
 plot_hyperparams_and_error()
-plot_derivatives(file3, data3_x_dot, data3_x_dot_predicted)
+plot_derivative_and_channel_comparison(file3, data3_x_dot, data3_x_dot_predicted)
 print()
