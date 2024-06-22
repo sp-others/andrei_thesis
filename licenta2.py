@@ -37,6 +37,7 @@ GPGO_INIT_EVALS = 3
 CPU_CORES_FOR_GPGO = int(os.getenv('CPU_CORES_FOR_GPGO', 4))
 
 PLOTS_DIR = 'out'
+PLT_FIG_SIZE = (12, 10)
 SHOW_PLOTS = False  # whether to show the plots interactively or not (recommend to use False when displaying many plots)
 # endregion
 
@@ -166,7 +167,7 @@ def run_gpgo(matrix) -> Tuple[OrderedDict[str, Union[int, float]], float]:
 
 
 def plot_data(matrix_name: str, matrix_to_plot):
-    plt.figure(figsize=(12, len(CHANNELS)))
+    plt.figure(figsize=PLT_FIG_SIZE)
     for i, eeg_data in enumerate(matrix_to_plot):
         plt.plot(t, matrix_to_plot[i], label=f'{i + 1:00}: {CHANNELS[i]}')
 
@@ -180,15 +181,15 @@ def plot_data(matrix_name: str, matrix_to_plot):
 def plot_derivative_and_channel_comparison(file_name, computed_derivative_, predicted_derivative_):
     # plot the 2 derivatives, fully
     for derivative_type, derivative in {'computed': computed_derivative_, 'predicted': predicted_derivative_}.items():
-        plt.figure()
+        plt.figure(figsize=PLT_FIG_SIZE)
         plt.plot(t, derivative.T)
         plt.xlabel('Time')
         plt.ylabel('Derivative')
         plt.title(f'{derivative_type} Derivative for {file_name}')
-        save_plot(f'2derivative_{derivative_type}')
+        save_plot(f'2_derivative_{derivative_type}')
     # plot a plot for each set of channels from both derivatives
     for i, channel in enumerate(CHANNELS):
-        plt.figure(figsize=(12, len(CHANNELS)))
+        plt.figure(figsize=PLT_FIG_SIZE)
         plt.plot(t, computed_derivative_[i], 'k', label=f'{channel} computed derivative')
         plt.plot(t, predicted_derivative_[i], 'r--', label=f'{channel} predicted derivative')
         plt.xlabel('Time (s)')
@@ -213,7 +214,7 @@ def plot_hyperparams_and_error():
             ('error', [('error', error_history)])
         ]
         for y_label, plot_set in plot_sets:
-            plt.figure()
+            plt.figure(figsize=PLT_FIG_SIZE)
             for label, data in plot_set:
                 plt.plot(data, label=label)
             plt.xlabel('Iteration')
