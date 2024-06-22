@@ -19,7 +19,7 @@ from sklearn.metrics import mean_squared_error
 # region tweak-able constants
 EMOTIONS = ['3_fericire']  # ['0_neutru', '1_tristete', '2_teama', '3_fericire']
 CHANNELS = ["F5", "FC1", "P5", "CP1", "P4", "PO8", "FP2", "FC6", "FZ", "PZ"]
-DATA_WIDTH = 5  # number of columns used from the csv file
+DATA_WIDTH = 6  # number of columns used from the csv file
 NR_TRAINING_SAMPLES = 3
 NR_VALIDATION_SAMPLES = 2
 
@@ -169,7 +169,7 @@ def run_gpgo(matrix) -> Tuple[OrderedDict[str, Union[int, float]], float]:
 def plot_data(matrix_name: str, matrix_to_plot):
     plt.figure(figsize=PLT_FIG_SIZE)
     for i, eeg_data in enumerate(matrix_to_plot):
-        plt.plot(t, matrix_to_plot[i], label=f'{i + 1:00}: {CHANNELS[i]}')
+        plt.plot(t, matrix_to_plot[i], label=f'{(i + 1):00}: {CHANNELS[i]}')
 
     plt.xlabel('Time (s)')
     plt.ylabel('Amplitude')
@@ -297,7 +297,7 @@ for emotion_i, emotion in enumerate(EMOTIONS):
         result = run_gpgo(transposed_matrix)
         list_of_name_and_result.append((sample_name, result))
 
-        graph_name_prefix = f'1_training_{sample_name_i + 1:00}_{sample_name}'
+        graph_name_prefix = f'1_training_{(sample_name_i + 1):00}_{sample_name}'
         params_ = Params.from_tuple_list(result[0])
         _, computed_derivative, predicted_derivative = fit(transposed_matrix, params_, False)
 
@@ -320,7 +320,7 @@ for emotion_i, emotion in enumerate(EMOTIONS):
         print(f'Running for validation sample {sample_name_i + 1}/{len(validation_samples)}: {sample_name}')
         transposed_matrix = read_data(f'{emotion}/{sample_name}', DATA_WIDTH, channel_index_list)
 
-        graph_name_prefix = f'2_validation_{sample_name_i + 1:00}_{sample_name}'
+        graph_name_prefix = f'2_validation_{(sample_name_i + 1):00}_{sample_name}'
         _, computed_derivative, predicted_derivative = fit(transposed_matrix, best_params, False)
 
         plot_data(sample_name, transposed_matrix)
