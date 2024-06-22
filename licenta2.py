@@ -31,6 +31,7 @@ alpha_bounds = ('cont', [0, 1e-12])
 GPGO_ITERATIONS = 20
 CPU_CORES_FOR_GPGO = int(os.getenv('CPU_CORES_FOR_GPGO', 4))
 
+PLOTS_DIR = 'out'
 SHOW_PLOTS = False  # whether to show the plots interactively or not (recommend to use False when displaying many plots)
 # endregion
 
@@ -293,8 +294,8 @@ print(data1_x_dot_predicted)
 
 
 # make sure the out dir exists
-if not os.path.exists('out'):
-    os.makedirs('out')
+if not os.path.exists(PLOTS_DIR):
+    os.makedirs(PLOTS_DIR)
 
 """
 if 429 Too Many Requests is thrown by PyCharm when plotting the graphs, then 
