@@ -136,6 +136,27 @@ def get_fitted_model(x, params: Params):
     return model.fit(x, t=t)
 
 
+def run_gpgo_and_get_result(matrix) -> Tuple[OrderedDict[str, Union[int, float]], float]:
+    gpgo = GPGO(surogate, acq, get_objective_function(matrix), param_bounds, n_jobs=CPU_CORES_FOR_GPGO)
+
+    # Run Bayesian Optimization
+    start_time = datetime.datetime.now().isoformat()
+    start = time.time()
+    print(start_time)
+    gpgo.run(max_iter=GPGO_ITERATIONS)
+    end_time = datetime.datetime.now().isoformat()
+    end = time.time()
+
+    print(f'GPGO with {GPGO_ITERATIONS} iterations ran from')
+    print(start_time)
+    print('to')
+    print(end_time)
+    print(f'Total time: {end - start} seconds')
+
+    # noinspection PyTypeChecker
+    return gpgo.getResult()
+
+
 def plot_derivatives(file_name, computed_derivative, predicted_derivative):
     global plot_derivatives_runs
     runs = plot_derivatives_runs
@@ -218,27 +239,6 @@ def plot_data():
         plt.legend(loc='upper right')
         plt.savefig(f'out/data_{name}.png', bbox_inches='tight')
         plt.show() if SHOW_PLOTS else plt.close()
-
-
-def run_gpgo_and_get_result(matrix) -> Tuple[OrderedDict[str, Union[int, float]], float]:
-    gpgo = GPGO(surogate, acq, get_objective_function(matrix), param_bounds, n_jobs=CPU_CORES_FOR_GPGO)
-
-    # Run Bayesian Optimization
-    start_time = datetime.datetime.now().isoformat()
-    start = time.time()
-    print(start_time)
-    gpgo.run(max_iter=GPGO_ITERATIONS)
-    end_time = datetime.datetime.now().isoformat()
-    end = time.time()
-
-    print(f'GPGO with {GPGO_ITERATIONS} iterations ran from')
-    print(start_time)
-    print('to')
-    print(end_time)
-    print(f'Total time: {end - start} seconds')
-
-    # noinspection PyTypeChecker
-    return gpgo.getResult()
 
 
 # make sure the out dir exists
