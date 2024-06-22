@@ -17,7 +17,7 @@ from pysindy import SINDy, PolynomialLibrary, FourierLibrary, STLSQ
 from sklearn.metrics import mean_squared_error
 
 # region tweak-able constants
-EMOTIONS = ['0_neutru', '1_tristete', '2_teama', '3_fericire']
+EMOTIONS = ['3_fericire']  # ['0_neutru', '1_tristete', '2_teama', '3_fericire']
 CHANNELS = ["F5", "FC1", "P5", "CP1", "P4", "PO8", "FP2", "FC6", "FZ", "PZ"]
 DATA_WIDTH = 5  # number of columns used from the csv file
 NR_TRAINING_SAMPLES = 3
