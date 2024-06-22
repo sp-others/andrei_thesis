@@ -321,8 +321,9 @@ for emotion_i, emotion in enumerate(EMOTIONS):
         transposed_matrix = read_data(f'{emotion}/{sample_name}', DATA_WIDTH, channel_index_list)
 
         graph_name_prefix = f'2_validation_{(sample_name_i + 1):00}_{sample_name}'
-        _, computed_derivative, predicted_derivative = fit(transposed_matrix, best_params, False)
+        error_, computed_derivative, predicted_derivative = fit(transposed_matrix, best_params, False)
 
+        print(f'Error: {error_}')
         plot_data(sample_name, transposed_matrix)
         plot_derivative_and_channel_comparison(sample_name, computed_derivative.T, predicted_derivative.T)
 
