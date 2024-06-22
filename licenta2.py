@@ -2,7 +2,8 @@ import datetime
 import os
 import random
 import time
-from typing import List
+from enum import Enum
+from typing import List, Union, Tuple, OrderedDict
 
 import matplotlib
 import numpy as np
@@ -28,7 +29,7 @@ ALPHA = 1
 degree_bounds = ('int', [2, 10])
 n_frequencies_bounds = ('int', [2, 9])
 threshold_bounds = ('cont', [0, 0.1])
-alpha_bounds = ('cont', [0, 1e-12])
+lambda_bounds = ('cont', [0, 1e-12])
 
 GPGO_ITERATIONS = 10
 CPU_CORES_FOR_GPGO = int(os.getenv('CPU_CORES_FOR_GPGO', 4))
@@ -46,6 +47,28 @@ error_sign = -1 ** USE_NEGATIVE_ERROR
 # Initialize history storage
 hyperparameter_history = []
 error_history = []
+
+
+class Params:
+    class Names(str, Enum):
+        # declaration order is important for from_tuple_list() and other usages of Params.Names
+        DEGREE = 'degree'
+        N_FREQUENCIES = 'n_frequencies'
+        THRESHOLD = 'threshold'
+        LAMBDA = 'lambda_val'
+
+    def __init__(self, degree: int, n_frequencies: int, threshold: float, lambda_val: float):
+        self.degree = degree
+        self.n_frequencies = n_frequencies
+        self.threshold = threshold
+        self.lambda_val = lambda_val
+
+    @staticmethod
+    def from_tuple_list(params: OrderedDict[str, int | float]):
+        return Params(*[params.get(name.value) for name in Params.Names])
+
+    def to_tuple(self):
+        return self.degree, self.n_frequencies, self.threshold, self.lambda_val
 
 
 def read_channel_indices(file_path, channel_list):
@@ -76,18 +99,19 @@ def read_data(filename, last_column_number=None, use_rows: List[int] = None):
 
 # Define the objective function
 def get_objective_function(x):
-    def objective(degree, n_frequencies, lambda_val, threshold):
-        return get_error_model_and_derivatives(x, degree, lambda_val, n_frequencies, threshold)[0]
+    def objective(degree, n_frequencies, threshold, lambda_val):
+        params = Params(degree, n_frequencies, threshold, lambda_val)
+        return get_error_model_and_derivatives(x, params)[0]
 
     return objective
 
 
-def get_error_model_and_derivatives(x, degree, lambda_val, n_frequencies, threshold, save_metadata=True):
-    model = get_fitted_model(x, degree, lambda_val, n_frequencies, threshold)
-    return get_error_and_derivatives(model, x, degree, lambda_val, n_frequencies, threshold, save_metadata)
+def get_error_model_and_derivatives(x, params: Params, save_metadata=True):
+    model = get_fitted_model(x, params)
+    return get_error_and_derivatives(model, x, params, save_metadata)
 
 
-def get_error_and_derivatives(model, x, degree, lambda_val, n_frequencies, threshold, save_metadata=True):
+def get_error_and_derivatives(model, x, params: Params, save_metadata=True):
     x_dot_predicted = model.predict(x)
     x_dot = model.differentiate(x, t=1)
     # model.print()
@@ -99,16 +123,16 @@ def get_error_and_derivatives(model, x, degree, lambda_val, n_frequencies, thres
     # Store hyperparameters and error for plotting
     if save_metadata:
         global hyperparameter_history, error_history
-        hyperparameter_history.append((degree, n_frequencies, lambda_val, threshold))
+        hyperparameter_history.append(params.to_tuple())
         error_history.append(error)
     return error, model, x_dot, x_dot_predicted
 
 
-def get_fitted_model(x, degree, lambda_val, n_frequencies, threshold):
-    poly_library = PolynomialLibrary(degree=int(degree), include_bias=True)
-    fourier_library = FourierLibrary(n_frequencies=int(n_frequencies))
+def get_fitted_model(x, params: Params):
+    poly_library = PolynomialLibrary(degree=int(params.degree), include_bias=True)
+    fourier_library = FourierLibrary(n_frequencies=int(params.n_frequencies))
     feature_library = poly_library + fourier_library
-    model = SINDy(feature_library=feature_library, optimizer=STLSQ(threshold=threshold, alpha=lambda_val))
+    model = SINDy(feature_library=feature_library, optimizer=STLSQ(threshold=params.threshold, alpha=params.lambda_val))
     return model.fit(x, t=t)
 
 
@@ -196,7 +220,7 @@ def plot_data():
         plt.show() if SHOW_PLOTS else plt.close()
 
 
-def run_gpgo_and_get_result(matrix):
+def run_gpgo_and_get_result(matrix) -> Tuple[OrderedDict[str, Union[int, float]], float]:
     gpgo = GPGO(surogate, acq, get_objective_function(matrix), param_bounds, n_jobs=CPU_CORES_FOR_GPGO)
 
     # Run Bayesian Optimization
@@ -213,6 +237,7 @@ def run_gpgo_and_get_result(matrix):
     print(end_time)
     print(f'Total time: {end - start} seconds')
 
+    # noinspection PyTypeChecker
     return gpgo.getResult()
 
 
@@ -241,10 +266,10 @@ channel_index_list = list(channel_to_index.values())
 
 # Define the parameter space
 param_bounds = {
-    'degree': degree_bounds,
-    'n_frequencies': n_frequencies_bounds,
-    'lambda_val': threshold_bounds,
-    'threshold': alpha_bounds
+    Params.Names.DEGREE.value: degree_bounds,
+    Params.Names.N_FREQUENCIES.value: n_frequencies_bounds,
+    Params.Names.THRESHOLD.value: threshold_bounds,
+    Params.Names.LAMBDA.value: lambda_bounds
 }
 
 # Set up Bayesian Optimization
@@ -256,6 +281,10 @@ t = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
 
 for emotion_i, emotion in enumerate(EMOTIONS):
     print(f'Running for emotion {emotion_i + 1}/{len(EMOTIONS)}: {emotion}')
+
+    global out_subdir
+    out_subdir = os.path.join(PLOTS_DIR, emotion)
+
     data_files = os.listdir(emotion)
 
     if nr_samples > len(data_files):
@@ -268,22 +297,28 @@ for emotion_i, emotion in enumerate(EMOTIONS):
     print(f'Training samples: {training_samples}')
     print(f'Validation samples: {validation_samples}')
 
-    best_results = []
-    for training_sample_i, training_sample in enumerate(training_samples):
-        print(f'Running for training sample {training_sample_i + 1}/{len(training_samples)}: {training_sample}')
-        data_matrix = read_data(f'{emotion}/{training_sample}', DATA_WIDTH, channel_index_list)
-        best_results.append((training_sample, run_gpgo_and_get_result(data_matrix)))
+    list_of_name_and_result = []
+    for sample_name_i, sample_name in enumerate(training_samples):
+        print(f'Running for training sample {sample_name_i + 1}/{len(training_samples)}: {sample_name}')
+        transposed_matrix = read_data(f'{emotion}/{sample_name}', DATA_WIDTH, channel_index_list)
+        result = run_gpgo_and_get_result(transposed_matrix)
+        list_of_name_and_result.append((sample_name, result))
+
+        # TODO: plot_matrix(sample_name, transposed_matrix)
+        # TODO: plot_derivative_and_channel_comparison(sample_name, transposed_matrix, result)
+        # TODO: plot_hyperparams_and_error()  # TODO: print at every matrix in the emotion, but reset at every emotion
 
     print('Best results:')
-    print(*best_results, sep='\n')
-    best_results_sorted = sorted(best_results, key=lambda x: x[1][1], reverse=USE_NEGATIVE_ERROR)
+    print(*list_of_name_and_result, sep='\n')
+    list_of_name_and_result_sorted = sorted(list_of_name_and_result, key=lambda x: x[1][1], reverse=USE_NEGATIVE_ERROR)
     print('Best results sorted:')
-    print(*best_results_sorted, sep='\n')
-    best_result = best_results_sorted[0]
+    print(*list_of_name_and_result_sorted, sep='\n')
+
+    best_result = list_of_name_and_result_sorted[0][1]
     print('Best result:', best_result)
 
-    global out_subdir
-    out_subdir = os.path.join(PLOTS_DIR, emotion)
+    best_params = Params.from_tuple_list(best_result[0])
+
     print()
 
 file1 = 'training_1.csv'
@@ -304,21 +339,15 @@ t_columns = np.linspace(1, DATA_WIDTH, DATA_WIDTH, dtype=int)
 
 
 # Run gpgo and get the best parameters
-best_params1 = run_gpgo_and_get_result(data1)
+best_result1 = run_gpgo_and_get_result(data1)
 
 print("Best Parameters:")
-print(best_params1)
+print(best_result1)
 
 # Refine the model with the best parameters
-degree_best = int(best_params1[0]['degree'])
-n_frequencies_best = int(best_params1[0]['n_frequencies'])
-lambda_best = best_params1[0]['lambda_val']
-threshold_best = best_params1[0]['threshold']
+best_params1 = Params.from_tuple_list(best_result1[0])
 
-data1_error, model1, data1_x_dot, data1_x_dot_predicted = get_error_model_and_derivatives(data1, degree_best,
-                                                                                          lambda_best,
-                                                                                          n_frequencies_best,
-                                                                                          threshold_best,
+data1_error, model1, data1_x_dot, data1_x_dot_predicted = get_error_model_and_derivatives(data1, best_params1,
                                                                                           save_metadata=False)
 
 print("Best Model Predictions:")
@@ -327,54 +356,40 @@ print(data1_x_dot_predicted)
 plot_data()
 plot_hyperparams_and_error()
 plot_derivatives(file1, data1_x_dot, data1_x_dot_predicted)
-data2_error, model2, data2_x_dot, data2_x_dot_predicted = get_error_and_derivatives(model1, data2, degree_best,
-                                                                                    lambda_best,
-                                                                                    n_frequencies_best,
-                                                                                    threshold_best)
+data2_error, model2, data2_x_dot, data2_x_dot_predicted = get_error_and_derivatives(model1, data2, best_params1)
 plot_hyperparams_and_error()
 plot_derivatives(file2, data2_x_dot, data2_x_dot_predicted)
 print("plotted graphs after 1st GPGO run")
 
-best_params2 = run_gpgo_and_get_result(data2)
+best_result2 = run_gpgo_and_get_result(data2)
+best_params2 = Params.from_tuple_list(best_result2[0])
 
-best_error1 = best_params1[1]
-best_error2 = best_params2[1]
+best_error1 = best_result1[1]
+best_error2 = best_result2[1]
 best_error = None
 
 if best_error1 < best_error2:
-    best_params = best_params1
+    best_result = best_result1
     print("Best parameters are from the 1st run")
 else:
-    best_params = best_params2
+    best_result = best_result2
     print("Best parameters are from the 2nd run")
 
-degree_best = int(best_params[0]['degree'])
-n_frequencies_best = int(best_params[0]['n_frequencies'])
-lambda_best = best_params[0]['lambda_val']
-threshold_best = best_params[0]['threshold']
+best_params = Params.from_tuple_list(best_result[0])
 
-data1_error, model1, data1_x_dot, data1_x_dot_predicted = get_error_model_and_derivatives(data1, degree_best,
-                                                                                          lambda_best,
-                                                                                          n_frequencies_best,
-                                                                                          threshold_best,
+data1_error, model1, data1_x_dot, data1_x_dot_predicted = get_error_model_and_derivatives(data1, best_params,
                                                                                           save_metadata=False)
 plot_derivatives_runs += 1
 plot_hyperparams_and_error()
 plot_derivatives(file1, data1_x_dot, data1_x_dot_predicted)
 
-data2_error, model2, data2_x_dot, data2_x_dot_predicted = get_error_model_and_derivatives(data2, degree_best,
-                                                                                          lambda_best,
-                                                                                          n_frequencies_best,
-                                                                                          threshold_best,
+data2_error, model2, data2_x_dot, data2_x_dot_predicted = get_error_model_and_derivatives(data2, best_params,
                                                                                           save_metadata=False)
 
 plot_derivatives(file2, data2_x_dot, data2_x_dot_predicted)
 print("plotted graphs after 2nd GPGO run")
 
-data3_error, model3, data3_x_dot, data3_x_dot_predicted = get_error_model_and_derivatives(data3, degree_best,
-                                                                                          lambda_best,
-                                                                                          n_frequencies_best,
-                                                                                          threshold_best)
+data3_error, model3, data3_x_dot, data3_x_dot_predicted = get_error_model_and_derivatives(data3, best_params)
 
 plot_hyperparams_and_error()
 plot_derivatives(file3, data3_x_dot, data3_x_dot_predicted)
