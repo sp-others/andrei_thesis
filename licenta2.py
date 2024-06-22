@@ -10,18 +10,18 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from pyGPGO.GPGO import GPGO
-from pyGPGO.covfunc import squaredExponential
-from pysindy import SINDy, PolynomialLibrary, FourierLibrary, STLSQ
-from pyGPGO.surrogates.GaussianProcess import GaussianProcess
 from pyGPGO.acquisition import Acquisition
+from pyGPGO.covfunc import squaredExponential
+from pyGPGO.surrogates.GaussianProcess import GaussianProcess
+from pysindy import SINDy, PolynomialLibrary, FourierLibrary, STLSQ
 from sklearn.metrics import mean_squared_error
 
 # region tweak-able constants
 EMOTIONS = ['0_neutru', '1_tristete', '2_teama', '3_fericire']
 CHANNELS = ["F5", "FC1", "P5", "CP1", "P4", "PO8", "FP2", "FC6", "FZ", "PZ"]
 DATA_WIDTH = 5  # number of columns used from the csv file
-NR_TRAINING_SAMPLES = 2
-NR_VALIDATION_SAMPLES = 1
+NR_TRAINING_SAMPLES = 3
+NR_VALIDATION_SAMPLES = 2
 
 USE_NEGATIVE_ERROR = True
 ALPHA = 1
@@ -31,7 +31,7 @@ n_frequencies_bounds = ('int', [2, 9])
 threshold_bounds = ('cont', [0, 0.001])
 lambda_bounds = ('cont', [0, 1e-16])
 
-GPGO_ITERATIONS = 5
+GPGO_ITERATIONS = 10
 GPGO_INIT_EVALS = 3
 CPU_CORES_FOR_GPGO = int(os.getenv('CPU_CORES_FOR_GPGO', 4))
 
@@ -176,7 +176,7 @@ def plot_data(matrix_name: str, matrix_to_plot):
     plt.ylabel('Amplitude')
     plt.title(f'EEG Data from {matrix_name}')
     plt.legend(loc='upper right')
-    save_plot('1data')
+    save_plot('1_data')
 
 
 def plot_derivative_and_channel_comparison(file_name, computed_derivative_, predicted_derivative_):
@@ -197,15 +197,15 @@ def plot_derivative_and_channel_comparison(file_name, computed_derivative_, pred
         plt.ylabel('Amplitude')
         plt.title(f'predicted vs computed for data {file_name} for channel {channel}')
         plt.legend(loc='upper right')
-        save_plot(f'3derivative_comparison_{channel}')
+        save_plot(f'3_derivative_comparison_{channel}')
 
 
 def plot_hyperparams_and_error():
     level_param_history_error_history_tuples = [
+        ('matrix', matrix_params_history, matrix_error_history),
         ('emotion', emotion_params_history, emotion_error_history),
-        ('matrix', matrix_params_history, matrix_error_history)
     ]
-    for level, params_history, error_history in level_param_history_error_history_tuples:
+    for i, (level, params_history, error_history) in enumerate(level_param_history_error_history_tuples):
         params_history_as_np = np.array(params_history)
         plot_sets = [
             ('params_degree_and_n-frequencies',
@@ -222,7 +222,7 @@ def plot_hyperparams_and_error():
             plt.ylabel(y_label)
             plt.legend()
             plt.title(f'Evolution of {y_label} at {level} level')
-            save_plot(f'4{level}_{y_label}')
+            save_plot(f'4.{i + 1}_{level}_{y_label}')
 
 
 def save_plot(name: str):
@@ -298,7 +298,7 @@ for emotion_i, emotion in enumerate(EMOTIONS):
         result = run_gpgo(transposed_matrix)
         list_of_name_and_result.append((sample_name, result))
 
-        graph_name_prefix = f'training_{sample_name_i + 1:00}_{sample_name}'
+        graph_name_prefix = f'1_training_{sample_name_i + 1:00}_{sample_name}'
         params_ = Params.from_tuple_list(result[0])
         _, _, computed_derivative, predicted_derivative = get_error_model_and_derivatives(transposed_matrix, params_,
                                                                                           False)
@@ -317,6 +317,17 @@ for emotion_i, emotion in enumerate(EMOTIONS):
     print('Best result:', best_result)
 
     best_params = Params.from_tuple_list(best_result[0])
+
+    for sample_name_i, sample_name in enumerate(validation_samples):
+        print(f'Running for validation sample {sample_name_i + 1}/{len(validation_samples)}: {sample_name}')
+        transposed_matrix = read_data(f'{emotion}/{sample_name}', DATA_WIDTH, channel_index_list)
+
+        graph_name_prefix = f'2_validation_{sample_name_i + 1:00}_{sample_name}'
+        _, _, computed_derivative, predicted_derivative = get_error_model_and_derivatives(transposed_matrix,
+                                                                                          best_params, False)
+
+        plot_data(sample_name, transposed_matrix)
+        plot_derivative_and_channel_comparison(sample_name, computed_derivative.T, predicted_derivative.T)
 
     print()
 
