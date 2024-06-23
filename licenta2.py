@@ -117,6 +117,9 @@ def get_objective_function(x):
 
 
 def fit(x, params: Params, save_history=True):
+    """
+    :return: compute_error_and_derivatives
+    """
     poly_library = PolynomialLibrary(degree=int(params.degree), include_bias=True)
     fourier_library = FourierLibrary(n_frequencies=int(params.n_frequencies))
     feature_library = poly_library + fourier_library
@@ -127,6 +130,9 @@ def fit(x, params: Params, save_history=True):
 
 
 def compute_error_and_derivatives(model, x, params: Params, save_history=True):
+    """
+    :return: error, x_dot, x_dot_predicted
+    """
     x_dot_predicted = model.predict(x)
     x_dot = model.differentiate(x, t=1)
     # model.print()
