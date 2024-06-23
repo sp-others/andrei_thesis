@@ -335,4 +335,4 @@ for emotion_i, emotion in enumerate(EMOTIONS):
 
     print()
 
-print('Done')
+print(f'End time: {datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}')
