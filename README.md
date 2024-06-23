@@ -3,6 +3,12 @@ https://github.com/AndreiRaceanu/Bachelor-Thesis
 
 you need to add the 'Channel Order.csv' file in the root directory of the project
 
+```powershell
+python -m venv venv
+venv\Scripts\activate
+pip install matplotlib numpy pandas pyGPGO pysindy scikit-learn
+```
+
 you can tweak the following in the 'tweak-able constants' region
 1. the emotions it runs for
 2. the channels it uses (it automatically gets those channel from the whole 62-channel data files)
