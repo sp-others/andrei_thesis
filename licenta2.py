@@ -26,7 +26,6 @@ NR_VALIDATION_SAMPLES = 2
 STLSQ_NORMALIZE_COLUMNS = True
 ALPHA = 1
 USE_NEGATIVE_ERROR = False
-UNSIGNED_ERROR_IF_MODEL_EQUATIONS_ARE_0 = 10 ** 4
 
 degree_bounds = ('int', [2, 10])
 n_frequencies_bounds = ('int', [2, 10])
@@ -139,8 +138,6 @@ def compute_error_and_derivatives(model, x, params: Params, save_history=True):
     # model.print()
     unsigned_error = model.score(x, metric=mean_squared_error) + ALPHA * model.complexity
     error = error_sign * unsigned_error
-    if all(equation == '0.000' for equation in model.equations()):
-        error = error_sign * UNSIGNED_ERROR_IF_MODEL_EQUATIONS_ARE_0
 
     # Store hyperparameters and error for plotting
     if save_history:
