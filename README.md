@@ -1,6 +1,19 @@
 # Licenta
 https://github.com/AndreiRaceanu/Bachelor-Thesis
 
+required files for the project to run:
+```
+0_neutru
+1_tristete
+2_teama
+3_fericire
+.gitignore
+venv
+Channel Order.csv
+licenta.py
+```
+
+
 you need to add the 'Channel Order.csv' file in the root directory of the project
 
 ```powershell
