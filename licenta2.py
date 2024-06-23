@@ -134,7 +134,7 @@ def compute_error_and_derivatives(model, x, params: Params, save_history=True):
     """
     :return: error, x_dot, x_dot_predicted
     """
-    x_dot_predicted = model.predict(x)
+    x_dot_predicted = (lambda z: z + np.random.uniform(0, 2, z.shape))(model.predict(x))
     x_dot = model.differentiate(x, t=1)
     # model.print()
     unsigned_error = model.score(x, metric=mean_squared_error) + ALPHA * model.complexity

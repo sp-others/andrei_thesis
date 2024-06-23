@@ -25,7 +25,7 @@ sed -n '3p;7p;10p;18p;22p;36p;43p;46p;48p;57p' 3_fericire/cz_eeg3.txt | cut -d, 
 
 # TODO: 2024 06 23 11:52
 1. ~~plot error descending (or rather according to the error sign)~~
-2. noise float between 0 and 2 and masked
+2. ~~noise float between 0 and 2 and masked~~
 
 # TODO: 2024 06 23 00:46
 1. remove out/ before remaking it
