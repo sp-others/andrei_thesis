@@ -218,7 +218,7 @@ def plot_hyperparams_and_error():
              [('degree', params_history_as_np[:, 0]), ('n_frequencies', params_history_as_np[:, 1])]),
             ('params_threshold', [('threshold', params_history_as_np[:, 2])]),
             ('params_lambda_val', [('lambda_val', params_history_as_np[:, 3])]),
-            ('error', [('error', error_history)])
+            ('error', [('error', sorted(error_history, reverse=not USE_NEGATIVE_ERROR))])
         ]
         for y_label, plot_set in plot_sets:
             plt.figure(figsize=PLT_FIG_SIZE)

@@ -18,6 +18,8 @@ def foo(a, b, c, d):
     print(a, b, c, d)
 
 
+print(sorted([1, 2, 3], reverse=True))
+
 foo(*all_values)
 
 print()
