@@ -24,8 +24,9 @@ NR_TRAINING_SAMPLES = 3
 NR_VALIDATION_SAMPLES = 2
 
 STLSQ_NORMALIZE_COLUMNS = True
-USE_NEGATIVE_ERROR = True
 ALPHA = 1
+USE_NEGATIVE_ERROR = False
+UNSIGNED_ERROR_IF_MODEL_EQUATIONS_ARE_0 = 10 ** 4
 
 degree_bounds = ('int', [2, 10])
 n_frequencies_bounds = ('int', [2, 10])
@@ -45,7 +46,7 @@ SHOW_PLOTS = False  # whether to show the plots interactively or not (recommend 
 # region computed properties
 nr_samples = NR_TRAINING_SAMPLES + NR_VALIDATION_SAMPLES
 
-error_sign = -1 ** USE_NEGATIVE_ERROR
+error_sign = (-1) ** USE_NEGATIVE_ERROR
 # endregion
 
 
@@ -139,7 +140,7 @@ def compute_error_and_derivatives(model, x, params: Params, save_history=True):
     unsigned_error = model.score(x, metric=mean_squared_error) + ALPHA * model.complexity
     error = error_sign * unsigned_error
     if all(equation == '0.000' for equation in model.equations()):
-        error = error_sign * 10 ** 4
+        error = error_sign * UNSIGNED_ERROR_IF_MODEL_EQUATIONS_ARE_0
 
     # Store hyperparameters and error for plotting
     if save_history:
@@ -255,6 +256,7 @@ plot_hyperparams_and_error_runs = 0
 plot_derivatives_runs = 0
 
 print(f'Using {CPU_CORES_FOR_GPGO} CPU cores for GPGO')
+print(f'USE_NEGATIVE_ERROR: {USE_NEGATIVE_ERROR}')
 channel_to_index = read_channel_indices('Channel Order.csv', CHANNELS)
 print(f'channel_to_index: {channel_to_index}')
 print()
