@@ -187,7 +187,7 @@ def plot_derivative_and_channel_comparison(file_name, computed_derivative_, pred
         plt.ylabel('Derivative')
         plt.title(f'{derivative_type} Derivative for {file_name}')
         save_plot(f'2_derivative_{derivative_type}')
-    # plot a plot for each set of channels from both derivatives
+    # for each channel, plot the comparison between the computed and predicted derivative
     for i, channel in enumerate(CHANNELS):
         plt.figure(figsize=PLT_FIG_SIZE)
         plt.plot(t, computed_derivative_[i], 'k', label=f'{channel} computed derivative')
