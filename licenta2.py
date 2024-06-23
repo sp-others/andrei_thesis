@@ -17,7 +17,7 @@ from pysindy import SINDy, PolynomialLibrary, FourierLibrary, STLSQ
 from sklearn.metrics import mean_squared_error
 
 # region tweak-able constants
-EMOTIONS = ['3_fericire']  # ['0_neutru', '1_tristete', '2_teama', '3_fericire']
+EMOTIONS = ['0_neutru', '1_tristete', '2_teama', '3_fericire']  # ['0_neutru', '1_tristete', '2_teama', '3_fericire']
 CHANNELS = ["F5", "FC1", "P5", "CP1", "P4", "PO8", "FP2", "FC6", "FZ", "PZ"]
 DATA_WIDTH = 6  # number of columns used from the csv file
 NR_TRAINING_SAMPLES = 3
@@ -149,15 +149,15 @@ def run_gpgo(matrix) -> Tuple[OrderedDict[str, Union[int, float]], float]:
     gpgo = GPGO(surogate, acq, get_objective_function(matrix), param_bounds, n_jobs=CPU_CORES_FOR_GPGO)
 
     # Run Bayesian Optimization
-    start_time = datetime.datetime.now().isoformat()
+    start_time_gpgo = datetime.datetime.now().isoformat()
     start = time.time()
-    print(start_time)
+    print(start_time_gpgo)
     gpgo.run(max_iter=GPGO_ITERATIONS, init_evals=GPGO_INIT_EVALS)
     end_time = datetime.datetime.now().isoformat()
     end = time.time()
 
     print(f'GPGO with {GPGO_ITERATIONS} iterations ran from')
-    print(start_time)
+    print(start_time_gpgo)
     print('to')
     print(end_time)
     print(f'Total time: {end - start} seconds')
@@ -229,9 +229,11 @@ def save_plot(name: str):
     plt.show() if SHOW_PLOTS else plt.close()
 
 
+start_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+print(f'Start time: {start_time}')
 # make sure the out dir exists
 for emotion in EMOTIONS:
-    os.makedirs(os.path.join(PLOTS_DIR, emotion), exist_ok=True)
+    os.makedirs(os.path.join(PLOTS_DIR, start_time, emotion), exist_ok=True)
 
 """
 if 429 Too Many Requests is thrown by PyCharm when plotting the graphs, then 
@@ -271,7 +273,7 @@ t_channels = np.linspace(0, len(CHANNELS) - 1, len(CHANNELS), dtype=int)
 for emotion_i, emotion in enumerate(EMOTIONS):
     print(f'Running for emotion {emotion_i + 1}/{len(EMOTIONS)}: {emotion}')
 
-    out_subdir = os.path.join(PLOTS_DIR, emotion)
+    out_subdir = os.path.join(PLOTS_DIR, start_time, emotion)
     emotion_params_history = []
     emotion_error_history = []
 
