@@ -25,7 +25,7 @@ NR_VALIDATION_SAMPLES = 2
 
 STLSQ_NORMALIZE_COLUMNS = True
 ALPHA = 0.01
-USE_NEGATIVE_ERROR = False
+USE_NEGATIVE_ERROR = True
 
 degree_bounds = ('int', [2, 10])
 n_frequencies_bounds = ('int', [2, 10])
