@@ -273,7 +273,6 @@ surogate = GaussianProcess(cov)
 acq = Acquisition(mode='ExpectedImprovement')
 
 t = np.linspace(0, DATA_WIDTH - 1, DATA_WIDTH, dtype=int)
-t_channels = np.linspace(0, len(CHANNELS) - 1, len(CHANNELS), dtype=int)
 
 for emotion_i, emotion in enumerate(EMOTIONS):
     print(f'Running for emotion {emotion_i + 1}/{len(EMOTIONS)}: {emotion}')
