@@ -249,9 +249,6 @@ https://youtrack.jetbrains.com/issue/PY-43687/Problems-with-many-plots-in-scient
 if not SHOW_PLOTS:
     matplotlib.use('Agg')
 
-plot_hyperparams_and_error_runs = 0
-plot_derivatives_runs = 0
-
 print(f'Using {CPU_CORES_FOR_GPGO} CPU cores for GPGO')
 print(f'USE_NEGATIVE_ERROR: {USE_NEGATIVE_ERROR}')
 channel_to_index = read_channel_indices('Channel Order.csv', CHANNELS)
