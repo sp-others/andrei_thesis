@@ -1,6 +1,7 @@
 import datetime
 import os
 import random
+import shutil
 import time
 from enum import Enum
 from typing import List, Union, Tuple, OrderedDict
@@ -239,6 +240,9 @@ print(f'Start time: {start_time}')
 for emotion in EMOTIONS:
     os.makedirs(os.path.join(PLOTS_DIR, start_time, emotion), exist_ok=True)
 
+# copy script file
+shutil.copy(__file__, os.path.join(PLOTS_DIR, start_time, os.path.basename(__file__)))
+
 """
 if 429 Too Many Requests is thrown by PyCharm when plotting the graphs, then 
 https://youtrack.jetbrains.com/issue/PY-43687/Problems-with-many-plots-in-scientific-view#focus=Comments-27-6266042.0-0
@@ -250,6 +254,7 @@ if not SHOW_PLOTS:
     matplotlib.use('Agg')
 
 print(f'Using {CPU_CORES_FOR_GPGO} CPU cores for GPGO')
+print(f'Using width of {DATA_WIDTH} for the data')
 print(f'USE_NEGATIVE_ERROR: {USE_NEGATIVE_ERROR}')
 channel_to_index = read_channel_indices('Channel Order.csv', CHANNELS)
 print(f'channel_to_index: {channel_to_index}')
